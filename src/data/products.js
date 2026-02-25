@@ -1,0 +1,16 @@
+export const products = [
+  {id:5,name:"Co-Living Housing",category:"studio",emoji:"🏠",price:3999,period:"/mo",description:"Safe, furnished accommodation near work hubs. Includes Wi-Fi, laundry, and security.",earnBadge:"Earn 15 pts for on-time rent"},
+  {id:6,name:"Daily Meals Plan",category:"studio",emoji:"🍛",price:1499,period:"/mo",description:"Nutritious home-style meals — breakfast, lunch, and dinner delivered or at community kitchens.",earnBadge:"Earn 1 pt per meal feedback"},
+  {id:7,name:"Health & Wellness Pack",category:"studio",emoji:"🏥",price:299,period:"/mo",description:"Basic healthcare coverage, teleconsultations, and access to partner clinics.",earnBadge:"Stay well, keep earning"},
+  {id:8,name:"Financial Savings Account",category:"studio",emoji:"💰",price:0,period:"",description:"Zero-fee micro-savings account with auto-save features and emergency fund options.",earnBadge:"Earn pts for on-time rent"},
+  {id:9,name:"Essential Kit Bundle",category:"studio",emoji:"🎒",price:599,period:"",description:"Work essentials starter kit — uniform basics, rain gear, phone accessories, and safety items.",earnBadge:"Part of your Nest starter"},
+  {id:1,name:"Job Matching Service",category:"flow",emoji:"💼",price:199,period:"/mo",description:"AI-powered job matching for delivery, warehouse, retail and more. Get matched to gigs near you.",earnBadge:"Earn 30 pts per job referral"},
+  {id:2,name:"Career Pathway Plan",category:"flow",emoji:"📈",price:499,period:"/qtr",description:"Personalised career roadmap with milestones, skill assessments, and guided progression.",earnBadge:"Complete milestones, earn pts"},
+  {id:3,name:"Quick Gig Access",category:"flow",emoji:"⚡",price:99,period:"/wk",description:"Instant access to same-day and next-day gig opportunities in your city.",earnBadge:"Earn 30 pts when your referral gets placed"},
+  {id:4,name:"Resume & Profile Builder",category:"flow",emoji:"📝",price:149,period:"",description:"Professional profile creation in multiple languages, optimised for gig platforms.",earnBadge:"Share with friends, earn referral pts"},
+  {id:10,name:"Digital Literacy Course",category:"tribe",emoji:"📱",price:249,period:"",description:"Learn smartphone skills, UPI payments, and app navigation in your local language.",earnBadge:"Earn 10 pts for attending"},
+  {id:11,name:"English Communication",category:"tribe",emoji:"💬",price:399,period:"",description:"Practical English for the workplace — greetings, directions, customer interactions.",earnBadge:"Earn 10 pts for attending"},
+  {id:12,name:"Leadership Programme",category:"tribe",emoji:"🌟",price:799,period:"",description:"Develop team leadership, conflict resolution, and management skills for career growth.",earnBadge:"Earn 10 pts + 25 pts for leading a session"},
+  {id:13,name:"Community Membership",category:"tribe",emoji:"🤝",price:99,period:"/mo",description:"Join local Tribe meetups, mentorship circles, peer support groups, and cultural events.",earnBadge:"Earn 5 pts/week for participation"},
+  {id:14,name:"Skill Certification",category:"tribe",emoji:"🏆",price:599,period:"",description:"Industry-recognised certificates in delivery, hospitality, retail, and warehouse operations.",earnBadge:"Earn 10 pts upon completion"},
+]

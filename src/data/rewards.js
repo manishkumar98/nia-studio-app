@@ -1,0 +1,16 @@
+export const rewards = [
+  {id:1,name:"Haat Voucher ₹50",cost:50,category:"food",emoji:"🛍️",fulfillment:"Instant QR",rupeesValue:50},
+  {id:2,name:"Haat Voucher ₹100",cost:90,category:"food",emoji:"🛍️",fulfillment:"Instant QR",rupeesValue:100},
+  {id:3,name:"Haat Voucher ₹200",cost:170,category:"food",emoji:"🛍️",fulfillment:"Instant QR",rupeesValue:200},
+  {id:4,name:"Free Umoja Meal",cost:30,category:"food",emoji:"🍛",fulfillment:"Same day",rupeesValue:0},
+  {id:5,name:"Free Chai Week",cost:25,category:"food",emoji:"☕",fulfillment:"Starts Monday",rupeesValue:0},
+  {id:6,name:"Phone Recharge ₹49",cost:50,category:"digital",emoji:"📱",fulfillment:"24 hours",rupeesValue:49},
+  {id:7,name:"Grooming Kit",cost:60,category:"essentials",emoji:"🧴",fulfillment:"Subject to stock",rupeesValue:0},
+  {id:8,name:"Laundry Credit 5kg",cost:20,category:"essentials",emoji:"👕",fulfillment:"Same week",rupeesValue:0},
+  {id:9,name:"Skill Badge Priority",cost:20,category:"skills",emoji:"🎓",fulfillment:"Next session",rupeesValue:0},
+  {id:10,name:"Video Call Booth 30 min",cost:15,category:"community",emoji:"📹",fulfillment:"Book 1 day ahead",rupeesValue:0},
+  {id:11,name:"Jambo Priority Stall",cost:40,category:"community",emoji:"🏪",fulfillment:"Next Jambo",rupeesValue:0},
+  {id:12,name:"Rent Discount ₹100",cost:100,category:"housing",emoji:"🏠",fulfillment:"Next billing cycle",rupeesValue:100},
+  {id:13,name:"Rent Discount ₹250",cost:225,category:"housing",emoji:"🏠",fulfillment:"Next billing cycle",rupeesValue:250},
+  {id:14,name:"Festival Gift Box",cost:75,category:"special",emoji:"🎁",fulfillment:"Festival period only",rupeesValue:0},
+]
