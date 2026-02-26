@@ -64,8 +64,34 @@ export function PointsProvider({ children }) {
     setCart([])
   }
 
-  const addVoucher = (voucher) => {
-    setVouchers(prev => [...prev, voucher])
+  const redeemReward = (userId, reward) => {
+    const balance = getBalance(userId)
+    if (balance < reward.cost) {
+      return { success: false, message: 'Insufficient points' }
+    }
+
+    // Deduct points via transaction
+    addTransaction({
+      userId,
+      description: `Redeemed: ${reward.name}`,
+      points: -reward.cost,
+      type: 'debit'
+    })
+
+    // Add to vouchers
+    const newVoucher = {
+      id: `vouch_${Date.now()}`,
+      userId,
+      rewardId: reward.id,
+      name: reward.name,
+      emoji: reward.emoji,
+      code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      date: new Date().toISOString().split('T')[0],
+      status: 'active'
+    }
+    setVouchers(prev => [newVoucher, ...prev])
+
+    return { success: true, voucher: newVoucher }
   }
 
   return (
@@ -81,7 +107,7 @@ export function PointsProvider({ children }) {
       changeQty,
       clearCart,
       vouchers,
-      addVoucher
+      redeemReward
     }}>
       {children}
     </PointsContext.Provider>

@@ -8,6 +8,9 @@ import Store from './components/Store'
 import CartDrawer from './components/CartDrawer'
 import BottomNav from './components/BottomNav'
 import PointsBanner from './components/PointsBanner'
+import Earn from './components/Earn'
+import Redeem from './components/Redeem'
+import Me from './components/Me'
 
 export default function App() {
   const { currentUser, logout } = useAuth()
@@ -118,20 +121,14 @@ export default function App() {
             <Store />
           </div>
         )}
+        {activeTab === 'earn' && <Earn />}
+        {activeTab === 'redeem' && <Redeem />}
         {activeTab === 'ranks' && (
           <div className="px-4 py-8 animate-fadeUp">
             <Leaderboard />
           </div>
         )}
-        {(activeTab === 'earn' || activeTab === 'redeem' || activeTab === 'me') && (
-          <div className="min-h-[70vh] flex flex-col items-center justify-center text-center p-8 animate-fadeIn">
-            <div className="text-7xl mb-6 grayscale opacity-20 filter blur-[1px]">
-              {activeTab === 'earn' ? '⚡' : activeTab === 'redeem' ? '🎁' : '👤'}
-            </div>
-            <h2 className="text-2xl font-black text-[#1d1d1f] mb-2">{activeTab.toUpperCase()}</h2>
-            <p className="text-[#86868b] max-w-sm font-medium">Coming soon in Phase 2. We're building your digital ecosystem one pillar at a time.</p>
-          </div>
-        )}
+        {activeTab === 'me' && <Me />}
       </main>
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
