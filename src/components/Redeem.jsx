@@ -11,9 +11,9 @@ export default function Redeem() {
 
     const balance = getBalance(currentUser.id)
 
-    const handleRedeem = (reward) => {
+    const handleRedeem = async (reward) => {
         setError('')
-        const result = requestRedemption(currentUser.id, reward)
+        const result = await requestRedemption(currentUser.id, reward)
         if (result.success) {
             setSuccessVoucher(result.voucher)
             window.scrollTo(0, 0)

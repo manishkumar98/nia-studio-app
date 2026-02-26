@@ -1,11 +1,24 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { mockUsers } from '../data/mockUsers'
+import { db } from '../firebase'
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  query,
+  where,
+  getDocs,
+  doc,
+  setDoc,
+  serverTimestamp
+} from 'firebase/firestore'
 
 const PointsContext = createContext()
 
 // Strict Voucher Code Generator
 const generateVoucherCode = () => {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No O, 0, I, 1 to avoid confusion
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let result = '';
   for (let i = 0; i < 6; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -14,65 +27,66 @@ const generateVoucherCode = () => {
 }
 
 export function PointsProvider({ children }) {
-  // Persistence Helper with better error handling
-  const getSaved = (key, fallback) => {
-    try {
-      const saved = localStorage.getItem(key)
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        console.log(`[DB] Loaded ${key}:`, parsed)
-        return parsed
-      }
-    } catch (e) {
-      console.error(`[DB] Error loading ${key}:`, e)
-    }
-    return fallback
-  }
-
-  const [userBalances, setUserBalances] = useState(() =>
-    getSaved('nia_balances', mockUsers.reduce((acc, user) => ({ ...acc, [user.id]: user.balance }), {}))
-  )
-
-  const [allTransactions, setAllTransactions] = useState(() =>
-    getSaved('nia_transactions', [
-      { id: 1, userId: 'u1', date: '2026-02-20', description: 'Nest made before 7 AM', points: 5, type: 'credit' },
-      { id: 2, userId: 'u1', date: '2026-02-19', description: 'Common area cleanup', points: 3, type: 'credit' },
-    ])
-  )
-
-  const [vouchers, setVouchers] = useState(() => getSaved('nia_vouchers', []))
+  const [userBalances, setUserBalances] = useState({})
+  const [allTransactions, setAllTransactions] = useState([])
+  const [vouchers, setVouchers] = useState([])
   const [cart, setCart] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  // Synchronous initial persist to avoid empty wipe
+  // 1. Sync Balances from Firestore
   useEffect(() => {
-    console.log("[DB] PointsProvider Mounted. Active Vouchers:", vouchers.length)
+    const unsub = onSnapshot(collection(db, 'balances'), (snapshot) => {
+      const balances = {}
+      snapshot.forEach(doc => {
+        balances[doc.id] = doc.data().points
+      })
+      // Merge with mock users if empty (initial seed)
+      if (Object.keys(balances).length === 0) {
+        const initial = mockUsers.reduce((acc, user) => ({ ...acc, [user.id]: user.balance }), {})
+        setUserBalances(initial)
+      } else {
+        setUserBalances(balances)
+      }
+    })
+    return unsub
   }, [])
 
-  // State Persistence Effects
+  // 2. Sync Vouchers from Firestore (Live across devices!)
   useEffect(() => {
-    localStorage.setItem('nia_balances', JSON.stringify(userBalances))
-  }, [userBalances])
+    const unsub = onSnapshot(collection(db, 'vouchers'), (snapshot) => {
+      const vouchList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      // Sort by date/timestamp
+      setVouchers(vouchList.sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds))
+      setLoading(false)
+    })
+    return unsub
+  }, [])
 
+  // 3. Sync Transactions
   useEffect(() => {
-    localStorage.setItem('nia_transactions', JSON.stringify(allTransactions))
-  }, [allTransactions])
+    const unsub = onSnapshot(collection(db, 'transactions'), (snapshot) => {
+      const transList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      setAllTransactions(transList.sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds))
+    })
+    return unsub
+  }, [])
 
-  useEffect(() => {
-    localStorage.setItem('nia_vouchers', JSON.stringify(vouchers))
-  }, [vouchers])
-
-  const addTransaction = (transaction) => {
-    const newTransaction = {
-      id: Date.now() + Math.floor(Math.random() * 1000), // More unique IDs
+  const addTransaction = async (transaction) => {
+    const newTrans = {
       ...transaction,
+      createdAt: serverTimestamp(),
       date: new Date().toISOString().split('T')[0]
     }
-    setAllTransactions(prev => [newTransaction, ...prev])
-    setUserBalances(prev => ({
-      ...prev,
-      [transaction.userId]: (prev[transaction.userId] || 0) + transaction.points
-    }))
-    return newTransaction
+
+    // Add to Firestore
+    await addDoc(collection(db, 'transactions'), newTrans)
+
+    // Update Balance in Firestore
+    const userRef = doc(db, 'balances', transaction.userId)
+    const currentBalance = userBalances[transaction.userId] || 0
+    await setDoc(userRef, { points: currentBalance + transaction.points }, { merge: true })
+
+    return newTrans
   }
 
   const getBalance = (userId) => userBalances[userId] || 0
@@ -82,93 +96,81 @@ export function PointsProvider({ children }) {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id)
       if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, qty: item.qty + 1 }
-            : item
-        )
+        return prev.map(item => item.id === product.id ? { ...item, qty: item.qty + 1 } : item)
       }
       return [...prev, { ...product, qty: 1 }]
     })
   }
 
-  const removeFromCart = (productId) => {
-    setCart(prev => prev.filter(item => item.id !== productId))
-  }
+  const clearCart = () => setCart([])
 
-  const changeQty = (productId, delta) => {
-    setCart(prev => {
-      return prev
-        .map(item =>
-          item.id === productId
-            ? { ...item, qty: Math.max(0, item.qty + delta) }
-            : item
-        )
-        .filter(item => item.qty > 0)
-    })
-  }
-
-  const clearCart = () => {
-    setCart([])
-  }
-
-  const requestRedemption = (userId, reward) => {
+  const requestRedemption = async (userId, reward) => {
     const balance = getBalance(userId)
     if (balance < reward.cost) {
       return { success: false, message: 'Insufficient points' }
     }
 
+    const voucherCode = generateVoucherCode()
     const newVoucher = {
-      id: `vouch_${Date.now()}`,
       userId,
       rewardId: reward.id,
       name: reward.name,
       emoji: reward.emoji,
       cost: reward.cost,
-      code: generateVoucherCode(),
+      code: voucherCode,
       date: new Date().toISOString().split('T')[0],
-      status: 'PENDING'
+      status: 'PENDING',
+      createdAt: serverTimestamp()
     }
 
-    console.log("[DB] Generating New Voucher:", newVoucher.code)
-    setVouchers(prev => [newVoucher, ...prev])
-    return { success: true, voucher: newVoucher }
+    try {
+      await addDoc(collection(db, 'vouchers'), newVoucher)
+      console.log("[FIREBASE] Voucher Saved Globally:", voucherCode)
+      return { success: true, voucher: { ...newVoucher, id: Date.now().toString() } }
+    } catch (e) {
+      console.error("Firebase Error:", e)
+      return { success: false, message: 'Database Error. Check connection.' }
+    }
   }
 
-  const fulfillRedemption = (code) => {
-    // Robust lookup (trim and case-insensitive)
+  const fulfillRedemption = async (code) => {
     const normalizedCode = code.trim().toUpperCase()
-    const voucherIndex = vouchers.findIndex(v => v.code === normalizedCode && v.status === 'PENDING')
 
-    if (voucherIndex === -1) {
-      console.warn("[DB] Voucher Fulfill Failed. Requested:", normalizedCode, "Current Vouchers:", vouchers)
+    // Query Firestore for the pending voucher
+    const q = query(collection(db, 'vouchers'),
+      where('code', '==', normalizedCode),
+      where('status', '==', 'PENDING')
+    )
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
       return { success: false, message: 'Invalid or already used voucher' }
     }
 
-    const voucher = vouchers[voucherIndex]
-    const balance = getBalance(voucher.userId)
+    const voucherDoc = querySnapshot.docs[0]
+    const voucherData = voucherDoc.data()
+    const balance = getBalance(voucherData.userId)
 
-    if (balance < voucher.cost) {
-      return { success: false, message: 'Resident has insufficient points now' }
+    if (balance < voucherData.cost) {
+      return { success: false, message: 'Resident has insufficient points' }
     }
 
-    addTransaction({
-      userId: voucher.userId,
-      description: `Redeemed: ${voucher.name}`,
-      points: -voucher.cost,
+    // 1. Deduct Points via Transaction
+    await addTransaction({
+      userId: voucherData.userId,
+      description: `Redeemed: ${voucherData.name}`,
+      points: -voucherData.cost,
       type: 'debit'
     })
 
-    setVouchers(prev => prev.map(v =>
-      v.code === normalizedCode ? { ...v, status: 'FULFILLED', fulfilledDate: new Date().toISOString() } : v
-    ))
+    // 2. Mark Voucher as Fulfilled in Firestore
+    await updateDoc(doc(db, 'vouchers', voucherDoc.id), {
+      status: 'FULFILLED',
+      fulfilledAt: serverTimestamp()
+    })
 
-    return { success: true, voucher: { ...voucher, status: 'FULFILLED' } }
-  }
-
-  const resetDatabase = () => {
-    localStorage.clear()
-    window.location.reload()
+    return { success: true, voucher: { ...voucherData, status: 'FULFILLED' } }
   }
 
   return (
@@ -180,13 +182,11 @@ export function PointsProvider({ children }) {
       addTransaction,
       cart,
       addToCart,
-      removeFromCart,
-      changeQty,
       clearCart,
       vouchers,
       requestRedemption,
       fulfillRedemption,
-      resetDatabase
+      loading
     }}>
       {children}
     </PointsContext.Provider>
@@ -195,8 +195,6 @@ export function PointsProvider({ children }) {
 
 export function usePoints() {
   const context = useContext(PointsContext)
-  if (!context) {
-    throw new Error('usePoints must be used within PointsProvider')
-  }
+  if (!context) throw new Error('usePoints must be used within PointsProvider')
   return context
 }

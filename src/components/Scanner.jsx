@@ -46,8 +46,8 @@ export default function Scanner() {
         setIsScanning(false)
     }
 
-    const handleFulfill = () => {
-        const result = fulfillRedemption(scannedVoucher.code)
+    const handleFulfill = async () => {
+        const result = await fulfillRedemption(scannedVoucher.code)
         if (result.success) {
             setSuccess(true)
             setScannedVoucher(null)
