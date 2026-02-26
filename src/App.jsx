@@ -58,7 +58,7 @@ export default function App() {
                 <div className="text-[10px] text-[#86868b] uppercase font-bold tracking-widest">{currentUser.nestName}</div>
               </div>
               <button
-                onClick={logout}
+                onClick={() => { console.log("Staff Sign Out Clicked"); logout(); }}
                 className="p-2.5 rounded-2xl bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all border border-gray-100"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
@@ -127,7 +127,12 @@ export default function App() {
               <div className="text-sm font-bold text-[#1d1d1f]">{currentUser.name}</div>
               <div className="text-[10px] text-[#86868b] uppercase font-bold tracking-widest">{currentUser.nestName}</div>
             </div>
-            <button onClick={logout} className="p-2 text-gray-400 hover:text-[#0071e3] transition-colors font-bold text-[10px] uppercase tracking-[0.2em]">Sign Out</button>
+            <button
+              onClick={() => { console.log("Sign Out Clicked"); logout(); }}
+              className="p-2 text-gray-400 hover:text-[#0071e3] transition-colors font-bold text-[10px] uppercase tracking-[0.2em]"
+            >
+              Sign Out
+            </button>
           </div>
         </div>
       </nav>

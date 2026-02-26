@@ -79,7 +79,15 @@ export function AuthProvider({ children }) {
     await createProfile(result.user, role)
   }
 
-  const logout = () => signOut(auth)
+  const logout = async () => {
+    try {
+      await signOut(auth)
+      setCurrentUser(null) // Manual clear for mock users
+    } catch (e) {
+      console.error("Logout Error:", e)
+      setCurrentUser(null)
+    }
+  }
 
   const setupRecaptcha = (containerId) => {
     if (!window.recaptchaVerifier) {
