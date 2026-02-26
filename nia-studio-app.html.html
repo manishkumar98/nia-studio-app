@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nia Studio — Flow & Tribe</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --text:#1d1d1f;
+  --text-secondary:#6e6e73;
+  --text-tertiary:#86868b;
+  --bg:#fff;
+  --bg-secondary:#f5f5f7;
+  --blue:#0071e3;
+  --blue-hover:#0077ed;
+  --border:#d2d2d7;
+  --card-shadow:0 4px 16px rgba(0,0,0,0.06);
+  --card-shadow-hover:0 12px 40px rgba(0,0,0,0.12);
+  --flow-color:#0071e3;
+  --studio-color:#bf4800;
+  --tribe-color:#1d1d1f;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;color:var(--text);background:var(--bg)}
+
+/* ===== NAV ===== */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(251,251,253,0.8);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid rgba(0,0,0,0.06);
+  height:48px;
+}
+.nav-inner{
+  max-width:1024px;margin:0 auto;height:100%;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;
+}
+.nav-logo{
+  font-size:18px;font-weight:700;color:var(--text);
+  letter-spacing:-0.5px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+}
+.nav-logo svg{width:20px;height:20px}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{
+  text-decoration:none;color:var(--text-secondary);
+  font-size:12px;font-weight:400;letter-spacing:0;
+  transition:color 0.3s;
+}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.nav-search{
+  background:none;border:none;cursor:pointer;
+  color:var(--text-secondary);padding:4px;
+  display:flex;align-items:center;
+}
+.nav-search svg{width:16px;height:16px}
+.cart-btn{
+  position:relative;background:none;border:none;
+  cursor:pointer;padding:4px;color:var(--text-secondary);
+  display:flex;align-items:center;
+}
+.cart-btn svg{width:16px;height:16px}
+.cart-badge{
+  position:absolute;top:-4px;right:-6px;
+  background:var(--blue);color:#fff;
+  font-size:9px;font-weight:700;
+  width:16px;height:16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transform:scale(0);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.cart-badge.show{transform:scale(1)}
+
+/* ===== HERO ===== */
+.hero{
+  text-align:center;
+  padding:80px 20px 40px;
+  background:var(--bg);
+}
+.hero-eyebrow{
+  font-size:17px;font-weight:400;
+  color:var(--studio-color);
+  margin-bottom:12px;
+}
+.hero h1{
+  font-size:clamp(40px,8vw,80px);
+  font-weight:700;letter-spacing:-0.04em;
+  line-height:1.05;
+  background:linear-gradient(to right,#1d1d1f,#6e6e73);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:20px;
+}
+.hero-sub{
+  font-size:clamp(17px,2.5vw,21px);
+  color:var(--text-secondary);
+  line-height:1.5;font-weight:400;
+  max-width:600px;margin:0 auto 32px;
+}
+.hero-links{display:flex;gap:24px;justify-content:center;align-items:center;flex-wrap:wrap}
+.hero-link{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:17px;color:var(--blue);
+  text-decoration:none;font-weight:400;
+  cursor:pointer;border:none;background:none;
+  transition:color 0.2s;
+}
+.hero-link:hover{color:var(--blue-hover);text-decoration:underline}
+.hero-link svg{width:14px;height:14px;margin-top:1px}
+.hero-link.primary{
+  background:var(--blue);color:#fff;
+  padding:12px 24px;border-radius:980px;
+  font-size:15px;font-weight:400;
+}
+.hero-link.primary:hover{background:var(--blue-hover);text-decoration:none}
+.hero-link.primary svg path{stroke:#fff}
+
+/* ===== FEATURED STRIP ===== */
+.featured-strip{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  max-width:1024px;margin:0 auto;padding:0 20px;
+  gap:12px;
+}
+.featured-card{
+  background:var(--bg-secondary);border-radius:24px;
+  padding:40px 32px;text-align:center;
+  cursor:pointer;transition:all 0.4s cubic-bezier(0.25,0.1,0.25,1);
+  position:relative;overflow:hidden;
+}
+.featured-card:hover{transform:scale(1.02)}
+.featured-card.active{outline:2px solid var(--blue);outline-offset:-2px}
+.featured-emoji{font-size:44px;margin-bottom:16px;display:block}
+.featured-card h3{
+  font-size:24px;font-weight:700;letter-spacing:-0.02em;
+  margin-bottom:8px;
+}
+.featured-card p{
+  font-size:14px;color:var(--text-secondary);
+  line-height:1.5;
+}
+.featured-link{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:14px;color:var(--blue);
+  margin-top:12px;text-decoration:none;
+  border:none;background:none;cursor:pointer;
+}
+.featured-link:hover{text-decoration:underline}
+
+/* ===== SECTION HEADERS ===== */
+.section-header{
+  max-width:1024px;margin:0 auto;
+  padding:80px 20px 20px;
+}
+.section-header h2{
+  font-size:clamp(28px,5vw,48px);
+  font-weight:700;letter-spacing:-0.03em;
+  color:var(--text);
+}
+.section-header p{
+  font-size:17px;color:var(--text-secondary);
+  margin-top:8px;font-weight:400;
+}
+
+/* ===== FILTER BAR ===== */
+.filter-bar{
+  max-width:1024px;margin:0 auto;
+  padding:0 20px 8px;
+  display:flex;align-items:center;gap:12px;
+  flex-wrap:wrap;
+}
+.filter-pill{
+  padding:8px 20px;border-radius:980px;
+  border:none;background:transparent;
+  font-size:14px;font-weight:400;color:var(--text-secondary);
+  cursor:pointer;transition:all 0.3s;
+  font-family:inherit;
+}
+.filter-pill:hover{background:var(--bg-secondary);color:var(--text)}
+.filter-pill.active{background:var(--text);color:#fff}
+
+/* ===== SEARCH ===== */
+.search-container{
+  max-width:1024px;margin:0 auto;padding:0 20px 24px;
+}
+.search-box{
+  position:relative;max-width:400px;
+}
+.search-box input{
+  width:100%;padding:10px 16px 10px 38px;
+  border:1px solid var(--border);border-radius:10px;
+  font-size:14px;background:var(--bg-secondary);
+  outline:none;font-family:inherit;color:var(--text);
+  transition:all 0.3s;
+}
+.search-box input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 4px rgba(0,113,227,0.1)}
+.search-box input::placeholder{color:var(--text-tertiary)}
+.search-box svg{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:15px;height:15px;color:var(--text-tertiary);
+}
+
+/* ===== PRODUCT GRID ===== */
+.product-grid{
+  max-width:1024px;margin:0 auto;padding:0 20px 80px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:16px;
+}
+.product-card{
+  background:var(--bg-secondary);border-radius:20px;
+  overflow:hidden;transition:all 0.4s cubic-bezier(0.25,0.1,0.25,1);
+  cursor:pointer;
+}
+.product-card:hover{transform:translateY(-6px);box-shadow:var(--card-shadow-hover)}
+.product-hero{
+  height:200px;display:flex;align-items:center;justify-content:center;
+  font-size:56px;position:relative;
+  transition:transform 0.5s cubic-bezier(0.25,0.1,0.25,1);
+}
+.product-card:hover .product-hero{transform:scale(1.05)}
+.product-hero.flow{background:linear-gradient(180deg,#e3f0ff 0%,#f5f5f7 100%)}
+.product-hero.studio{background:linear-gradient(180deg,#fff0e6 0%,#f5f5f7 100%)}
+.product-hero.tribe{background:linear-gradient(180deg,#e8e8ed 0%,#f5f5f7 100%)}
+.product-body{padding:20px 20px 24px}
+.product-tag{
+  font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.06em;margin-bottom:6px;
+}
+.product-tag.flow{color:var(--flow-color)}
+.product-tag.studio{color:var(--studio-color)}
+.product-tag.tribe{color:var(--text-tertiary)}
+.product-name{
+  font-size:17px;font-weight:600;letter-spacing:-0.01em;
+  margin-bottom:4px;color:var(--text);
+}
+.product-desc{
+  font-size:13px;color:var(--text-secondary);
+  line-height:1.45;margin-bottom:16px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.product-bottom{display:flex;align-items:center;justify-content:space-between}
+.product-price{
+  font-size:17px;font-weight:600;color:var(--text);
+  letter-spacing:-0.02em;
+}
+.product-price .period{font-size:12px;font-weight:400;color:var(--text-tertiary)}
+.add-to-bag{
+  padding:8px 18px;border-radius:980px;
+  background:var(--blue);color:#fff;
+  font-size:13px;font-weight:500;border:none;
+  cursor:pointer;font-family:inherit;
+  transition:all 0.3s;
+}
+.add-to-bag:hover{background:var(--blue-hover)}
+.add-to-bag.added{background:#1d1d1f}
+
+/* ===== CART DRAWER ===== */
+.cart-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.48);
+  z-index:200;opacity:0;pointer-events:none;
+  transition:opacity 0.4s;
+}
+.cart-overlay.open{opacity:1;pointer-events:all}
+.cart-drawer{
+  position:fixed;top:0;right:0;width:420px;max-width:92vw;
+  height:100%;background:#fff;z-index:201;
+  transform:translateX(100%);
+  transition:transform 0.5s cubic-bezier(0.32,0.72,0,1);
+  display:flex;flex-direction:column;
+}
+.cart-drawer.open{transform:translateX(0)}
+.cart-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px;border-bottom:1px solid rgba(0,0,0,0.06);
+}
+.cart-head h2{font-size:21px;font-weight:700;letter-spacing:-0.02em}
+.cart-close{
+  width:32px;height:32px;border-radius:50%;
+  border:none;background:var(--bg-secondary);cursor:pointer;
+  font-size:16px;display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all 0.2s;
+}
+.cart-close:hover{background:#e8e8ed;color:var(--text)}
+.cart-body{flex:1;overflow-y:auto;padding:8px 24px}
+.cart-empty{text-align:center;padding:80px 20px;color:var(--text-tertiary);font-size:15px}
+.cart-empty-icon{font-size:40px;margin-bottom:12px;display:block;opacity:0.4}
+.cart-item{
+  display:flex;gap:16px;padding:20px 0;
+  border-bottom:1px solid rgba(0,0,0,0.04);
+  animation:fadeUp 0.35s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ci-img{
+  width:64px;height:64px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;flex-shrink:0;
+}
+.ci-img.flow{background:linear-gradient(180deg,#e3f0ff,#f0f5ff)}
+.ci-img.studio{background:linear-gradient(180deg,#fff0e6,#fff7f0)}
+.ci-img.tribe{background:linear-gradient(180deg,#e8e8ed,#f0f0f2)}
+.ci-info{flex:1;display:flex;flex-direction:column;justify-content:center}
+.ci-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.ci-price{font-size:14px;font-weight:600;color:var(--text)}
+.ci-controls{
+  display:flex;align-items:center;gap:10px;margin-top:8px;
+}
+.ci-qty-btn{
+  width:26px;height:26px;border-radius:50%;
+  border:1px solid var(--border);background:#fff;
+  cursor:pointer;font-size:14px;font-weight:500;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);transition:all 0.2s;
+}
+.ci-qty-btn:hover{border-color:var(--blue);color:var(--blue)}
+.ci-qty{font-size:14px;font-weight:600;min-width:16px;text-align:center}
+.ci-remove{
+  margin-left:auto;background:none;border:none;
+  color:var(--blue);cursor:pointer;font-size:12px;
+  font-family:inherit;transition:opacity 0.2s;
+}
+.ci-remove:hover{opacity:0.7}
+.cart-foot{
+  padding:20px 24px;
+  border-top:1px solid rgba(0,0,0,0.06);
+  background:#fff;
+}
+.cart-total-row{
+  display:flex;justify-content:space-between;
+  margin-bottom:16px;
+}
+.cart-total-label{font-size:14px;color:var(--text-secondary)}
+.cart-total-val{font-size:17px;font-weight:700;letter-spacing:-0.02em}
+.checkout-btn{
+  width:100%;padding:14px;border-radius:12px;
+  background:var(--blue);color:#fff;
+  font-size:15px;font-weight:600;border:none;
+  cursor:pointer;font-family:inherit;
+  transition:all 0.3s;letter-spacing:-0.01em;
+}
+.checkout-btn:hover{background:var(--blue-hover)}
+.checkout-btn:disabled{background:#d2d2d7;cursor:not-allowed;color:var(--text-tertiary)}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--text);color:#fff;
+  padding:12px 24px;border-radius:980px;
+  font-size:14px;font-weight:500;
+  box-shadow:0 8px 30px rgba(0,0,0,0.16);
+  z-index:300;
+  transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ===== PROMO BANNER ===== */
+.promo-section{
+  background:var(--bg-secondary);
+  padding:80px 20px;text-align:center;
+  margin-bottom:0;
+}
+.promo-section h2{
+  font-size:clamp(28px,5vw,40px);
+  font-weight:700;letter-spacing:-0.03em;
+  margin-bottom:12px;
+}
+.promo-section p{
+  font-size:17px;color:var(--text-secondary);
+  max-width:500px;margin:0 auto 24px;
+  line-height:1.5;
+}
+
+/* ===== FOOTER ===== */
+.footer{
+  background:var(--bg-secondary);
+  padding:0 20px;
+}
+.footer-inner{
+  max-width:1024px;margin:0 auto;
+  border-top:1px solid var(--border);
+  padding:16px 0;
+}
+.footer-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:20px;padding:20px 0 40px;
+}
+.footer-col h4{
+  font-size:12px;font-weight:600;color:var(--text);
+  margin-bottom:12px;
+}
+.footer-col a{
+  display:block;font-size:12px;color:var(--text-secondary);
+  text-decoration:none;line-height:2.2;
+  transition:color 0.2s;
+}
+.footer-col a:hover{color:var(--text)}
+.footer-bottom{
+  border-top:1px solid var(--border);
+  padding:16px 0;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:8px;
+}
+.footer-bottom p{font-size:12px;color:var(--text-tertiary)}
+.footer-bottom-links{display:flex;gap:16px;flex-wrap:wrap}
+.footer-bottom-links a{font-size:12px;color:var(--text-secondary);text-decoration:none}
+.footer-bottom-links a:hover{color:var(--text)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:734px){
+  .nav-links{display:none}
+  .featured-strip{grid-template-columns:1fr;gap:8px}
+  .featured-card{padding:28px 24px}
+  .product-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .product-hero{height:160px;font-size:44px}
+  .product-body{padding:14px 14px 18px}
+  .product-name{font-size:15px}
+  .product-desc{font-size:12px;-webkit-line-clamp:2}
+  .product-price{font-size:15px}
+  .add-to-bag{padding:6px 14px;font-size:12px}
+  .hero{padding:60px 20px 32px}
+  .section-header{padding:48px 20px 16px}
+  .footer-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:420px){
+  .product-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="scrollTo('hero')">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M8 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Nia
+    </div>
+    <ul class="nav-links">
+      <li><a href="javascript:void(0)" class="active" onclick="scrollTo('hero')">Home</a></li>
+      <li><a href="javascript:void(0)" onclick="filterAndScroll('studio')">Studio</a></li>
+      <li><a href="javascript:void(0)" onclick="filterAndScroll('flow')">Flow</a></li>
+      <li><a href="javascript:void(0)" onclick="filterAndScroll('tribe')">Tribe</a></li>
+      <li><a href="javascript:void(0)" onclick="scrollTo('shop')">Shop</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-search" onclick="document.querySelector('.search-box input').focus();scrollTo('shop')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <button class="cart-btn" onclick="toggleCart()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-eyebrow">Nia One Ecosystem</div>
+  <h1>Live. Work. Grow.</h1>
+  <p class="hero-sub">Three pillars, one mission. Connecting India's workforce to stability, opportunity, and community.</p>
+  <div class="hero-links">
+    <button class="hero-link primary" onclick="scrollTo('shop')">
+      Explore all services
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+    <button class="hero-link" onclick="scrollTo('pillars')">
+      Learn more
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- FEATURED PILLARS -->
+<section id="pillars">
+  <div class="featured-strip">
+    <div class="featured-card" onclick="filterAndScroll('studio')">
+      <span class="featured-emoji">&#x1F3E0;</span>
+      <h3>Studio</h3>
+      <p>Stabilise daily life. Affordable housing, meals, healthcare, and essentials.</p>
+      <button class="featured-link">Explore Studio <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" width="12" height="12"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="featured-card" onclick="filterAndScroll('flow')">
+      <span class="featured-emoji">&#x1F680;</span>
+      <h3>Flow</h3>
+      <p>Get connected to work. AI job matching, gig placements, and career pathways.</p>
+      <button class="featured-link">Explore Flow <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" width="12" height="12"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="featured-card" onclick="filterAndScroll('tribe')">
+      <span class="featured-emoji">&#x1F91D;</span>
+      <h3>Tribe</h3>
+      <p>Learn, connect, grow. Digital upskilling, mentorship, and community events.</p>
+      <button class="featured-link">Explore Tribe <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" width="12" height="12"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section id="shop">
+  <div class="section-header">
+    <h2>The Nia Store.</h2>
+    <p>Everything you need to work, live, and thrive.</p>
+  </div>
+
+  <div class="search-container">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search services..." oninput="searchProducts(this.value)">
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-pill active" onclick="filterProducts('all')">All Products</button>
+    <button class="filter-pill" onclick="filterProducts('studio')">Studio</button>
+    <button class="filter-pill" onclick="filterProducts('flow')">Flow</button>
+    <button class="filter-pill" onclick="filterProducts('tribe')">Tribe</button>
+  </div>
+
+  <div class="product-grid" id="productsGrid"></div>
+</section>
+
+<!-- PROMO -->
+<section class="promo-section" id="promo">
+  <h2>Built for India's workforce.</h2>
+  <p>From migrants to gig workers, Nia helps millions access jobs, stable living, and growth opportunities.</p>
+  <button class="hero-link primary" onclick="scrollTo('shop')">Get started</button>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" id="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Shop & Learn</h4>
+        <a href="javascript:void(0)" onclick="filterAndScroll('studio')">Studio</a>
+        <a href="javascript:void(0)" onclick="filterAndScroll('flow')">Flow</a>
+        <a href="javascript:void(0)" onclick="filterAndScroll('tribe')">Tribe</a>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <a href="javascript:void(0)">Job Matching</a>
+        <a href="javascript:void(0)">Co-Living</a>
+        <a href="javascript:void(0)">Upskilling</a>
+      </div>
+      <div class="footer-col">
+        <h4>Nia One</h4>
+        <a href="javascript:void(0)">About Us</a>
+        <a href="javascript:void(0)">Careers</a>
+        <a href="javascript:void(0)">Partner With Us</a>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <a href="javascript:void(0)">Contact Us</a>
+        <a href="javascript:void(0)">FAQ</a>
+        <a href="javascript:void(0)">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Nia One. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="javascript:void(0)">Privacy Policy</a>
+        <a href="javascript:void(0)">Terms of Use</a>
+        <a href="javascript:void(0)">Legal</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- CART -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-head">
+    <h2>Bag</h2>
+    <button class="cart-close" onclick="toggleCart()">&#x2715;</button>
+  </div>
+  <div class="cart-body" id="cartItems"></div>
+  <div class="cart-foot">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Subtotal</span>
+      <span class="cart-total-val" id="cartTotal">&#8377;0</span>
+    </div>
+    <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">Check Out</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const products = [
+  // STUDIO
+  {id:5,name:"Co-Living Housing",category:"studio",emoji:"\u{1F3E0}",price:3999,period:"/mo",
+   desc:"Safe, furnished accommodation near work hubs. Includes Wi-Fi, laundry, and security."},
+  {id:6,name:"Daily Meals Plan",category:"studio",emoji:"\u{1F35B}",price:1499,period:"/mo",
+   desc:"Nutritious home-style meals \u2014 breakfast, lunch, and dinner delivered or at community kitchens."},
+  {id:7,name:"Health & Wellness Pack",category:"studio",emoji:"\u{1F3E5}",price:299,period:"/mo",
+   desc:"Basic healthcare coverage, teleconsultations, and access to partner clinics."},
+  {id:8,name:"Financial Savings Account",category:"studio",emoji:"\u{1F4B0}",price:0,period:"",
+   desc:"Zero-fee micro-savings account with auto-save features and emergency fund options."},
+  {id:9,name:"Essential Kit Bundle",category:"studio",emoji:"\u{1F392}",price:599,period:"",
+   desc:"Work essentials starter kit \u2014 uniform basics, rain gear, phone accessories, and safety items."},
+  // FLOW
+  {id:1,name:"Job Matching Service",category:"flow",emoji:"\u{1F4BC}",price:199,period:"/mo",
+   desc:"AI-powered job matching for delivery, warehouse, retail and more. Get matched to gigs near you."},
+  {id:2,name:"Career Pathway Plan",category:"flow",emoji:"\u{1F4C8}",price:499,period:"/qtr",
+   desc:"Personalised career roadmap with milestones, skill assessments, and guided progression."},
+  {id:3,name:"Quick Gig Access",category:"flow",emoji:"\u26A1",price:99,period:"/wk",
+   desc:"Instant access to same-day and next-day gig opportunities in your city."},
+  {id:4,name:"Resume & Profile Builder",category:"flow",emoji:"\u{1F4DD}",price:149,period:"",
+   desc:"Professional profile creation in multiple languages, optimised for gig platforms."},
+  {id:10,name:"Digital Literacy Course",category:"tribe",emoji:"\u{1F4F1}",price:249,period:"",
+   desc:"Learn smartphone skills, UPI payments, and app navigation in your local language."},
+  {id:11,name:"English Communication",category:"tribe",emoji:"\u{1F4AC}",price:399,period:"",
+   desc:"Practical English for the workplace \u2014 greetings, directions, customer interactions."},
+  {id:12,name:"Leadership Programme",category:"tribe",emoji:"\u{1F31F}",price:799,period:"",
+   desc:"Develop team leadership, conflict resolution, and management skills for career growth."},
+  {id:13,name:"Community Membership",category:"tribe",emoji:"\u{1F91D}",price:99,period:"/mo",
+   desc:"Join local Tribe meetups, mentorship circles, peer support groups, and cultural events."},
+  {id:14,name:"Skill Certification",category:"tribe",emoji:"\u{1F3C6}",price:599,period:"",
+   desc:"Industry-recognised certificates in delivery, hospitality, retail, and warehouse operations."},
+];
+
+let cart=[];
+let currentFilter='all';
+let searchQuery='';
+
+function renderProducts(){
+  const grid=document.getElementById('productsGrid');
+  const filtered=products.filter(p=>{
+    const mc=currentFilter==='all'||p.category===currentFilter;
+    const ms=p.name.toLowerCase().includes(searchQuery)||
+             p.desc.toLowerCase().includes(searchQuery)||
+             p.category.toLowerCase().includes(searchQuery);
+    return mc&&ms;
+  });
+  grid.innerHTML=filtered.map(p=>{
+    const inCart=cart.find(c=>c.id===p.id);
+    return `
+      <div class="product-card">
+        <div class="product-hero ${p.category}">${p.emoji}</div>
+        <div class="product-body">
+          <div class="product-tag ${p.category}">${p.category}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.desc}</div>
+          <div class="product-bottom">
+            <div class="product-price">
+              ${p.price===0?'Free':'\u20B9'+p.price.toLocaleString('en-IN')}
+              ${p.period?`<span class="period">${p.period}</span>`:''}
+            </div>
+            <button class="add-to-bag ${inCart?'added':''}" onclick="event.stopPropagation();addToCart(${p.id})">
+              ${inCart?'Added':'Add'}
+            </button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  if(!filtered.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text-tertiary);font-size:15px">No results found.</div>';
+  }
+}
+
+function filterProducts(cat){
+  currentFilter=cat;
+  document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.filter-pill').forEach(b=>{
+    if(b.textContent.toLowerCase().includes(cat)||(cat==='all'&&b.textContent.includes('All')))b.classList.add('active');
+  });
+  document.querySelectorAll('.featured-card').forEach(c=>c.classList.remove('active'));
+  if(cat!=='all'){
+    const idx=['studio','flow','tribe'].indexOf(cat);
+    if(idx>=0)document.querySelectorAll('.featured-card')[idx].classList.add('active');
+  }
+  renderProducts();
+}
+
+function filterAndScroll(cat){
+  filterProducts(cat);
+  scrollTo('shop');
+}
+
+function searchProducts(q){searchQuery=q.toLowerCase();renderProducts()}
+
+function addToCart(id){
+  const ex=cart.find(c=>c.id===id);
+  if(ex){ex.qty++}else{
+    const p=products.find(p=>p.id===id);
+    cart.push({...p,qty:1});
+  }
+  updateCart();showToast('Added to your Bag');renderProducts();
+}
+function removeFromCart(id){cart=cart.filter(c=>c.id!==id);updateCart();renderProducts()}
+function changeQty(id,d){
+  const item=cart.find(c=>c.id===id);
+  if(item){item.qty+=d;if(item.qty<=0){removeFromCart(id);return}}
+  updateCart();
+}
+
+function updateCart(){
+  const badge=document.getElementById('cartBadge');
+  const total=cart.reduce((s,i)=>s+i.qty,0);
+  badge.textContent=total;
+  badge.classList.toggle('show',total>0);
+  const el=document.getElementById('cartItems');
+  if(!cart.length){
+    el.innerHTML='<div class="cart-empty"><span class="cart-empty-icon">\u{1F6D2}</span>Your Bag is empty.</div>';
+    document.getElementById('checkoutBtn').disabled=true;
+  }else{
+    document.getElementById('checkoutBtn').disabled=false;
+    el.innerHTML=cart.map(i=>`
+      <div class="cart-item">
+        <div class="ci-img ${i.category}">${i.emoji}</div>
+        <div class="ci-info">
+          <div class="ci-name">${i.name}</div>
+          <div class="ci-price">${i.price===0?'Free':'\u20B9'+(i.price*i.qty).toLocaleString('en-IN')}</div>
+          <div class="ci-controls">
+            <button class="ci-qty-btn" onclick="changeQty(${i.id},-1)">\u2212</button>
+            <span class="ci-qty">${i.qty}</span>
+            <button class="ci-qty-btn" onclick="changeQty(${i.id},1)">+</button>
+            <button class="ci-remove" onclick="removeFromCart(${i.id})">Remove</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  const tp=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById('cartTotal').textContent='\u20B9'+tp.toLocaleString('en-IN');
+}
+
+function toggleCart(){
+  document.getElementById('cartOverlay').classList.toggle('open');
+  document.getElementById('cartDrawer').classList.toggle('open');
+}
+function checkout(){
+  if(!cart.length)return;
+  const t=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  toggleCart();
+  showToast('Order placed \u2014 \u20B9'+t.toLocaleString('en-IN'));
+  cart=[];updateCart();renderProducts();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function scrollTo(id){
+  const el=document.getElementById(id);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+renderProducts();updateCart();
+</script>
+</body>
+</html>
