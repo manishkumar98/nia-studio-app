@@ -24,7 +24,7 @@ Nia Studio is a modern web application designed for blue-collar migrant workers 
 - Node.js (v18+)
 - npm or yarn
 
-### Installation
+### Installation (React/Vite)
 1. Clone the repository
 2. Install dependencies:
    ```bash
@@ -34,6 +34,12 @@ Nia Studio is a modern web application designed for blue-collar migrant workers 
    ```bash
    npm run dev
    ```
+
+### Hosting on Streamlit Cloud
+This project includes a Streamlit port (`app.py`) for quick cloud hosting.
+1. Connect this GitHub repo to [Streamlit Cloud](https://share.streamlit.io/).
+2. Set the main file path to `app.py`.
+3. Deploy!
 
 ## 🏗️ Phased Roadmap
 
