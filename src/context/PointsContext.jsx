@@ -8,8 +8,8 @@ export function PointsProvider({ children }) {
     mockUsers.reduce((acc, user) => ({ ...acc, [user.id]: user.balance }), {})
   )
   const [allTransactions, setAllTransactions] = useState([
-    { id: 1, userId: 'u1', date: '2025-02-20', description: 'Nest made before 7 AM', points: 5, type: 'credit' },
-    { id: 2, userId: 'u1', date: '2025-02-19', description: 'Common area cleanup', points: 3, type: 'credit' },
+    { id: 1, userId: 'u1', date: '2026-02-20', description: 'Nest made before 7 AM', points: 5, type: 'credit' },
+    { id: 2, userId: 'u1', date: '2026-02-19', description: 'Common area cleanup', points: 3, type: 'credit' },
   ])
   const [cart, setCart] = useState([])
   const [vouchers, setVouchers] = useState([])
@@ -25,6 +25,7 @@ export function PointsProvider({ children }) {
       ...prev,
       [transaction.userId]: (prev[transaction.userId] || 0) + transaction.points
     }))
+    return newTransaction
   }
 
   const getBalance = (userId) => userBalances[userId] || 0
@@ -64,34 +65,58 @@ export function PointsProvider({ children }) {
     setCart([])
   }
 
-  const redeemReward = (userId, reward) => {
+  // Resident initiates the request
+  const requestRedemption = (userId, reward) => {
     const balance = getBalance(userId)
     if (balance < reward.cost) {
       return { success: false, message: 'Insufficient points' }
     }
 
-    // Deduct points via transaction
-    addTransaction({
-      userId,
-      description: `Redeemed: ${reward.name}`,
-      points: -reward.cost,
-      type: 'debit'
-    })
-
-    // Add to vouchers
     const newVoucher = {
       id: `vouch_${Date.now()}`,
       userId,
       rewardId: reward.id,
       name: reward.name,
       emoji: reward.emoji,
+      cost: reward.cost,
       code: Math.random().toString(36).substring(2, 8).toUpperCase(),
       date: new Date().toISOString().split('T')[0],
-      status: 'active'
+      status: 'PENDING'
     }
-    setVouchers(prev => [newVoucher, ...prev])
 
+    setVouchers(prev => [newVoucher, ...prev])
     return { success: true, voucher: newVoucher }
+  }
+
+  // EAE scans and fulfills the request
+  const fulfillRedemption = (code) => {
+    const voucherIndex = vouchers.findIndex(v => v.code === code && v.status === 'PENDING')
+
+    if (voucherIndex === -1) {
+      return { success: false, message: 'Invalid or already used voucher' }
+    }
+
+    const voucher = vouchers[voucherIndex]
+    const balance = getBalance(voucher.userId)
+
+    if (balance < voucher.cost) {
+      return { success: false, message: 'Resident has insufficient points now' }
+    }
+
+    // Deduct points NOW
+    addTransaction({
+      userId: voucher.userId,
+      description: `Redeemed: ${voucher.name}`,
+      points: -voucher.cost,
+      type: 'debit'
+    })
+
+    // Update voucher status
+    setVouchers(prev => prev.map(v =>
+      v.code === code ? { ...v, status: 'FULFILLED', fulfilledDate: new Date().toISOString() } : v
+    ))
+
+    return { success: true, voucher: { ...voucher, status: 'FULFILLED' } }
   }
 
   return (
@@ -107,7 +132,8 @@ export function PointsProvider({ children }) {
       changeQty,
       clearCart,
       vouchers,
-      redeemReward
+      requestRedemption,
+      fulfillRedemption
     }}>
       {children}
     </PointsContext.Provider>

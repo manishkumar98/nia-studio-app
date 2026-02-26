@@ -11,13 +11,14 @@ import PointsBanner from './components/PointsBanner'
 import Earn from './components/Earn'
 import Redeem from './components/Redeem'
 import Me from './components/Me'
+import Scanner from './components/Scanner'
 
 export default function App() {
   const { currentUser, logout } = useAuth()
   const { cart } = usePoints()
   const [activeTab, setActiveTab] = useState('store')
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [staffView, setStaffView] = useState('ledger')
+  const [staffView, setStaffView] = useState('scanner') // Default to scanner for quick redemption
 
   if (!currentUser) {
     return <Login />
@@ -33,7 +34,7 @@ export default function App() {
         <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 h-16 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white">
+              <div className="w-10 h-10 bg-[#1d1d1f] rounded-xl flex items-center justify-center text-white">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
               </div>
               <div>
@@ -49,7 +50,7 @@ export default function App() {
               </div>
               <button
                 onClick={logout}
-                className="p-2.5 rounded-2xl bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                className="p-2.5 rounded-2xl bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all border border-gray-100"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
               </button>
@@ -58,16 +59,22 @@ export default function App() {
         </nav>
 
         <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-16 z-30">
-          <div className="max-w-7xl mx-auto flex gap-2">
+          <div className="max-w-7xl mx-auto flex gap-2 overflow-x-auto no-scrollbar">
+            <button
+              onClick={() => setStaffView('scanner')}
+              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${staffView === 'scanner' ? 'bg-[#0071e3] text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+            >
+              📷 QR Scanner
+            </button>
             <button
               onClick={() => setStaffView('ledger')}
-              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all ${staffView === 'ledger' ? 'bg-[#0071e3] text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${staffView === 'ledger' ? 'bg-[#0071e3] text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
             >
               📝 Manual Ledger
             </button>
             <button
               onClick={() => setStaffView('leaderboard')}
-              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all ${staffView === 'leaderboard' ? 'bg-[#0071e3] text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${staffView === 'leaderboard' ? 'bg-[#0071e3] text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
             >
               🎯 Leaderboard
             </button>
@@ -75,7 +82,9 @@ export default function App() {
         </header>
 
         <main className="max-w-7xl mx-auto p-4 md:p-8">
-          {staffView === 'ledger' ? <ManualLedger /> : <Leaderboard />}
+          {staffView === 'scanner' && <Scanner />}
+          {staffView === 'ledger' && <ManualLedger />}
+          {staffView === 'leaderboard' && <Leaderboard />}
         </main>
       </div>
     )
@@ -90,7 +99,7 @@ export default function App() {
             <div className="w-10 h-10 bg-[#0071e3] rounded-xl flex items-center justify-center text-white">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-4.305-6.218A7 7 0 1118.354 12.571m1.391 8.357c-1.744-2.772-2.753-6.054-2.753-9.571m-2.753-7.429L12 9" /></svg>
             </div>
-            <span className="text-xl font-black tracking-tight text-[#1d1d1f] ml-2">Nia One</span>
+            <span className="text-xl font-black tracking-tight text-[#1d1d1f] ml-2 font-display">Nia One</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -109,7 +118,7 @@ export default function App() {
               <div className="text-sm font-bold text-[#1d1d1f]">{currentUser.name}</div>
               <div className="text-[10px] text-[#86868b] uppercase font-bold tracking-widest">{currentUser.nestName}</div>
             </div>
-            <button onClick={logout} className="p-2 text-gray-400 hover:text-[#0071e3] transition-colors font-bold text-xs uppercase tracking-widest">Sign Out</button>
+            <button onClick={logout} className="p-2 text-gray-400 hover:text-[#0071e3] transition-colors font-bold text-[10px] uppercase tracking-[0.2em]">Sign Out</button>
           </div>
         </div>
       </nav>
