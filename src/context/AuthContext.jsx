@@ -18,43 +18,66 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onSnapshotAuth()
-    return unsubscribe
-  }, [])
-
-  const onSnapshotAuth = () => {
-    return onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Fetch user profile from Firestore or create one
+        // Fetch user profile from Firestore
         const userDoc = await getDoc(doc(db, 'users', user.uid))
         if (userDoc.exists()) {
-          setCurrentUser({ ...user, ...userDoc.data() })
+          setCurrentUser({ uid: user.uid, ...userDoc.data() })
         } else {
-          // New user default profile
+          // New user default profile (if not created via social login flow)
           const newProfile = {
-            name: user.displayName || 'New Resident',
+            name: user.displayName || 'New User',
             email: user.email || '',
-            role: 'resident', // Default role
+            role: 'resident', // Default role for safety
             nestId: 'n1',
             nestName: 'Kush-12',
-            balance: 0,
-            employeeId: user.phoneNumber || user.email?.split('@')[0] || `NIA${Math.floor(Math.random() * 1000)}`
+            balance: 100,
+            employeeId: user.phoneNumber || user.email?.split('@')[0] || `NIA${Math.floor(Math.random() * 1000)}`,
+            createdAt: new Date().toISOString()
           }
           await setDoc(doc(db, 'users', user.uid), newProfile)
-          setCurrentUser({ ...user, ...newProfile })
+          setCurrentUser({ uid: user.uid, ...newProfile })
         }
       } else {
         setCurrentUser(null)
       }
       setLoading(false)
     })
+    return unsubscribe
+  }, [])
+
+  const createProfile = async (user, role = 'resident') => {
+    const newProfile = {
+      name: user.displayName || 'New User',
+      email: user.email || '',
+      role: role, // 'resident' or 'eae'
+      nestId: 'n1',
+      nestName: 'Kush-12',
+      balance: role === 'resident' ? 100 : 0,
+      employeeId: user.phoneNumber || user.email?.split('@')[0] || `NIA${Math.floor(Math.random() * 1000)}`,
+      createdAt: new Date().toISOString()
+    }
+    await setDoc(doc(db, 'users', user.uid), newProfile)
+    setCurrentUser({ uid: user.uid, ...newProfile })
+    return newProfile
   }
 
-  const loginWithGoogle = () => signInWithPopup(auth, googleProvider)
+  const loginWithGoogle = async (role = 'resident') => {
+    const result = await signInWithPopup(auth, googleProvider)
+    const user = result.user
+    const userDoc = await getDoc(doc(db, 'users', user.uid))
+    if (!userDoc.exists()) {
+      await createProfile(user, role)
+    }
+  }
 
   const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password)
 
-  const registerWithEmail = (email, password) => createUserWithEmailAndPassword(auth, email, password)
+  const registerWithEmail = async (email, password, role = 'resident') => {
+    const result = await createUserWithEmailAndPassword(auth, email, password)
+    await createProfile(result.user, role)
+  }
 
   const logout = () => signOut(auth)
 
@@ -70,10 +93,17 @@ export function AuthProvider({ children }) {
     return signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
   }
 
-  // Fallback for current mock login system during transition
-  const mockLogin = (user) => {
-    setCurrentUser(user)
+  const confirmOtp = async (confirmationResult, otp, role = 'resident') => {
+    const result = await confirmationResult.confirm(otp)
+    const user = result.user
+    const userDoc = await getDoc(doc(db, 'users', user.uid))
+    if (!userDoc.exists()) {
+      await createProfile(user, role)
+    }
   }
+
+  // Legacy support
+  const mockLogin = (user) => setCurrentUser(user)
 
   return (
     <AuthContext.Provider value={{
@@ -85,6 +115,7 @@ export function AuthProvider({ children }) {
       logout,
       setupRecaptcha,
       sendOtp,
+      confirmOtp,
       mockLogin
     }}>
       {!loading && children}
@@ -94,8 +125,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider')
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider')
   return context
 }
