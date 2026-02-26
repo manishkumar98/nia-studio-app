@@ -14,11 +14,19 @@ import Me from './components/Me'
 import Scanner from './components/Scanner'
 
 export default function App() {
-  const { currentUser, logout } = useAuth()
+  const { currentUser, logout, loading } = useAuth()
   const { cart } = usePoints()
   const [activeTab, setActiveTab] = useState('store')
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [staffView, setStaffView] = useState('scanner') // Default to scanner for quick redemption
+  const [staffView, setStaffView] = useState('scanner')
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f7]">
+        <div className="w-16 h-16 border-4 border-[#0071e3] border-t-transparent rounded-full animate-spin shadow-xl"></div>
+      </div>
+    )
+  }
 
   if (!currentUser) {
     return <Login />
@@ -26,6 +34,7 @@ export default function App() {
 
   const isStaff = currentUser.role === 'eae' || currentUser.role === 'jco'
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0)
+  const userId = currentUser.uid || currentUser.id // Support both Firebase and legacy IDs
 
   // --- 1. STAFF VIEW (Pure Management Dashboard) ---
   if (isStaff) {
@@ -126,7 +135,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto">
         {activeTab === 'store' && (
           <div className="animate-fadeUp">
-            <PointsBanner userId={currentUser.id} />
+            <PointsBanner userId={userId} />
             <Store />
           </div>
         )}
