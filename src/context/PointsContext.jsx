@@ -3,15 +3,30 @@ import { mockUsers } from '../data/mockUsers'
 
 const PointsContext = createContext()
 
+// Strict Voucher Code Generator
+const generateVoucherCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No O, 0, I, 1 to avoid confusion
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 export function PointsProvider({ children }) {
-  // Persistence Helper
+  // Persistence Helper with better error handling
   const getSaved = (key, fallback) => {
-    const saved = localStorage.getItem(key)
     try {
-      return saved ? JSON.parse(saved) : fallback
+      const saved = localStorage.getItem(key)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        console.log(`[DB] Loaded ${key}:`, parsed)
+        return parsed
+      }
     } catch (e) {
-      return fallback
+      console.error(`[DB] Error loading ${key}:`, e)
     }
+    return fallback
   }
 
   const [userBalances, setUserBalances] = useState(() =>
@@ -28,6 +43,11 @@ export function PointsProvider({ children }) {
   const [vouchers, setVouchers] = useState(() => getSaved('nia_vouchers', []))
   const [cart, setCart] = useState([])
 
+  // Synchronous initial persist to avoid empty wipe
+  useEffect(() => {
+    console.log("[DB] PointsProvider Mounted. Active Vouchers:", vouchers.length)
+  }, [])
+
   // State Persistence Effects
   useEffect(() => {
     localStorage.setItem('nia_balances', JSON.stringify(userBalances))
@@ -43,7 +63,7 @@ export function PointsProvider({ children }) {
 
   const addTransaction = (transaction) => {
     const newTransaction = {
-      id: Math.max(...allTransactions.map(t => t.id), 0) + 1,
+      id: Date.now() + Math.floor(Math.random() * 1000), // More unique IDs
       ...transaction,
       date: new Date().toISOString().split('T')[0]
     }
@@ -105,19 +125,23 @@ export function PointsProvider({ children }) {
       name: reward.name,
       emoji: reward.emoji,
       cost: reward.cost,
-      code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      code: generateVoucherCode(),
       date: new Date().toISOString().split('T')[0],
       status: 'PENDING'
     }
 
+    console.log("[DB] Generating New Voucher:", newVoucher.code)
     setVouchers(prev => [newVoucher, ...prev])
     return { success: true, voucher: newVoucher }
   }
 
   const fulfillRedemption = (code) => {
-    const voucherIndex = vouchers.findIndex(v => v.code === code && v.status === 'PENDING')
+    // Robust lookup (trim and case-insensitive)
+    const normalizedCode = code.trim().toUpperCase()
+    const voucherIndex = vouchers.findIndex(v => v.code === normalizedCode && v.status === 'PENDING')
 
     if (voucherIndex === -1) {
+      console.warn("[DB] Voucher Fulfill Failed. Requested:", normalizedCode, "Current Vouchers:", vouchers)
       return { success: false, message: 'Invalid or already used voucher' }
     }
 
@@ -136,10 +160,15 @@ export function PointsProvider({ children }) {
     })
 
     setVouchers(prev => prev.map(v =>
-      v.code === code ? { ...v, status: 'FULFILLED', fulfilledDate: new Date().toISOString() } : v
+      v.code === normalizedCode ? { ...v, status: 'FULFILLED', fulfilledDate: new Date().toISOString() } : v
     ))
 
     return { success: true, voucher: { ...voucher, status: 'FULFILLED' } }
+  }
+
+  const resetDatabase = () => {
+    localStorage.clear()
+    window.location.reload()
   }
 
   return (
@@ -156,7 +185,8 @@ export function PointsProvider({ children }) {
       clearCart,
       vouchers,
       requestRedemption,
-      fulfillRedemption
+      fulfillRedemption,
+      resetDatabase
     }}>
       {children}
     </PointsContext.Provider>

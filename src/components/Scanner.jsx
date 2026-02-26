@@ -115,8 +115,8 @@ export default function Scanner() {
                             type="submit"
                             disabled={code.length < 6}
                             className={`w-full py-4 rounded-2xl font-black text-sm tracking-widest uppercase transition-all shadow-lg ${code.length === 6
-                                    ? 'bg-blue-600 text-white hover:bg-blue-500 scale-105 active:scale-95'
-                                    : 'bg-white/10 text-white/30 cursor-not-allowed'
+                                ? 'bg-blue-600 text-white hover:bg-blue-500 scale-105 active:scale-95'
+                                : 'bg-white/10 text-white/30 cursor-not-allowed'
                                 }`}
                         >
                             Execute Lookup
@@ -208,6 +208,49 @@ export default function Scanner() {
                     </div>
                 </div>
             )}
+
+            {/* Debugging Log for Staff */}
+            <div className="mt-16 pt-8 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-6 px-2">
+                    <h3 className="text-[10px] font-black text-[#86868b] uppercase tracking-widest">System Voucher Log (Staff Only)</h3>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="text-[9px] font-bold text-blue-600 uppercase hover:underline"
+                    >
+                        Sync Database
+                    </button>
+                </div>
+
+                <div className="space-y-3">
+                    {vouchers.length === 0 ? (
+                        <div className="p-4 bg-gray-50 rounded-2xl text-center">
+                            <p className="text-[10px] text-gray-400 font-medium">No vouchers found in local database.</p>
+                        </div>
+                    ) : (
+                        vouchers.slice(0, 5).map(v => (
+                            <div
+                                key={v.id}
+                                onClick={() => { setCode(v.code); setError(''); }}
+                                className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl hover:border-blue-200 transition-colors cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="text-lg opacity-80">{v.emoji}</span>
+                                    <div>
+                                        <p className="text-[11px] font-black text-[#1d1d1f] leading-none mb-1">{v.name}</p>
+                                        <p className="text-[9px] font-bold text-[#86868b]">{v.userId} • {v.date}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <code className="text-[11px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">{v.code}</code>
+                                    <p className={`text-[8px] font-black uppercase mt-1 ${v.status === 'PENDING' ? 'text-amber-500' : 'text-green-500'}`}>
+                                        {v.status}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
 
             <div className="mt-12 opacity-30 text-center">
                 <p className="text-[9px] uppercase font-black tracking-[0.2em] flex items-center justify-center gap-2">
