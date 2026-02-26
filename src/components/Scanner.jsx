@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { mockUsers } from '../data/mockUsers'
 
 export default function Scanner() {
-    const { fulfillRedemption, getBalance, vouchers } = usePoints()
+    const { fulfillRedemption, getBalance, vouchers, getVoucherRecord } = usePoints()
     const { currentUser } = useAuth()
     const [code, setCode] = useState('')
     const [scannedVoucher, setScannedVoucher] = useState(null)
@@ -12,38 +12,46 @@ export default function Scanner() {
     const [success, setSuccess] = useState(false)
     const [isScanning, setIsScanning] = useState(true)
 
-    const handleLookup = (e) => {
+    const handleLookup = async (e) => {
         if (e) e.preventDefault()
-        if (code.length < 6) return
+        const normalizedCode = code.trim().toUpperCase()
+        if (normalizedCode.length < 6) return
 
         setError('')
         setSuccess(false)
 
-        const voucher = vouchers.find(v => v.code === code.toUpperCase())
+        try {
+            // Find directly in Firestore for 100% accuracy
+            const voucher = await getVoucherRecord(normalizedCode)
 
-        if (!voucher) {
-            setError('INVALID VOUCHER CODE')
-            setScannedVoucher(null)
-            return
+            if (!voucher) {
+                console.log("[SCANNER] Code not found in Database:", normalizedCode)
+                setError('INVALID VOUCHER CODE')
+                setScannedVoucher(null)
+                return
+            }
+
+            if (voucher.status !== 'PENDING') {
+                setError(`VOUCHER ALREADY ${voucher.status}`)
+                setScannedVoucher(null)
+                return
+            }
+
+            // Get resident details
+            const resident = mockUsers.find(u => u.id === voucher.userId)
+            const balance = getBalance(voucher.userId)
+
+            setScannedVoucher({
+                ...voucher,
+                residentName: resident ? resident.name : 'Unknown Resident',
+                currentBalance: balance,
+                residentNest: resident ? resident.nestName : 'N/A'
+            })
+            setIsScanning(false)
+        } catch (err) {
+            console.error("Lookup Error:", err)
+            setError("SYSTEM ERROR")
         }
-
-        if (voucher.status !== 'PENDING') {
-            setError(`VOUCHER ALREADY ${voucher.status}`)
-            setScannedVoucher(null)
-            return
-        }
-
-        // Get resident details
-        const resident = mockUsers.find(u => u.id === voucher.userId)
-        const balance = getBalance(voucher.userId)
-
-        setScannedVoucher({
-            ...voucher,
-            residentName: resident ? resident.name : 'Unknown Resident',
-            currentBalance: balance,
-            residentNest: resident ? resident.nestName : 'N/A'
-        })
-        setIsScanning(false)
     }
 
     const handleFulfill = async () => {

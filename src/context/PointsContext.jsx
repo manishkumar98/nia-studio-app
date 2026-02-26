@@ -173,6 +173,16 @@ export function PointsProvider({ children }) {
     return { success: true, voucher: { ...voucherData, status: 'FULFILLED' } }
   }
 
+  const getVoucherRecord = async (code) => {
+    const normalizedCode = code.trim().toUpperCase()
+    const q = query(collection(db, 'vouchers'),
+      where('code', '==', normalizedCode)
+    )
+    const snapshot = await getDocs(q)
+    if (snapshot.empty) return null
+    return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() }
+  }
+
   return (
     <PointsContext.Provider value={{
       userBalances,
@@ -186,6 +196,7 @@ export function PointsProvider({ children }) {
       vouchers,
       requestRedemption,
       fulfillRedemption,
+      getVoucherRecord,
       loading
     }}>
       {children}
