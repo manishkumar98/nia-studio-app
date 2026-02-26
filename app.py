@@ -2,234 +2,167 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# --- CONFIG ---
-st.set_page_config(page_title="Nia Studio", page_icon="⚡", layout="wide")
+# --- MANAGEMENT UI CONFIG ---
+st.set_page_config(
+    page_title="Nia Staff - Kush Nest Management", 
+    page_icon="📝", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# --- CUSTOM CSS ---
+# --- THEMEING ---
 st.markdown("""
     <style>
-    .main {
-        background-color: #f5f5f7;
+    [data-testid="stSidebar"] {
+        background-color: #0071e3;
+        color: white;
+    }
+    [data-testid="stSidebar"] * {
+        color: white !important;
     }
     .stButton>button {
-        width: 100%;
         border-radius: 12px;
-        height: 3em;
-        background-color: #0071e3;
+        height: 3.5em;
+        background-color: #1d1d1f;
         color: white;
         font-weight: bold;
         border: none;
+        transition: all 0.2s;
     }
     .stButton>button:hover {
-        background-color: #0077ed;
+        background-color: #424245;
         color: white;
+        transform: translateY(-1px);
     }
-    .card {
-        padding: 20px;
-        border-radius: 20px;
-        background-color: white;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        margin-bottom: 20px;
-    }
-    .points-banner {
-        background: linear-gradient(90deg, #0071e3 0%, #0077ed 100%);
+    .metric-card {
+        background-color: #f5f5f7;
         padding: 24px;
-        border-radius: 24px;
-        color: white;
-        margin-bottom: 30px;
-        position: relative;
-        overflow: hidden;
-    }
-    .points-banner::after {
-        content: '⚡';
-        position: absolute;
-        right: -10px;
-        top: -10px;
-        font-size: 100px;
-        opacity: 0.1;
-    }
-    .leaderboard-card {
-        padding: 15px 25px;
         border-radius: 20px;
-        background-color: white;
         border: 1px solid #e5e7eb;
+    }
+    .resident-row {
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f2;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
-    }
-    .rank-badge {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        margin-right: 15px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- DATA ---
+# --- MOCK PERSISTENCE ---
 if 'users' not in st.session_state:
     st.session_state.users = [
-        {"id": "u1", "name": "Ramesh Kumar", "employeeId": "NIA001", "pin": "1234", "role": "resident", "balance": 185},
-        {"id": "u2", "name": "Priya Sharma", "employeeId": "NIA002", "pin": "1234", "role": "resident", "balance": 340},
-        {"id": "u3", "name": "Arjun Patel", "employeeId": "NIA003", "pin": "1234", "role": "resident", "balance": 72},
-        {"id": "u4", "name": "Sunita Devi", "employeeId": "NIA004", "pin": "1234", "role": "resident", "balance": 0},
-        {"id": "u5", "name": "Rajan EAE", "employeeId": "EAE001", "pin": "0000", "role": "eae", "balance": 0},
+        {"id": "u1", "name": "Ramesh Kumar", "employeeId": "NIA001", "role": "resident", "balance": 200, "nest": "Kush-12"},
+        {"id": "u2", "name": "Priya Sharma", "employeeId": "NIA002", "role": "resident", "balance": 345, "nest": "Kush-12"},
+        {"id": "u3", "name": "Arjun Patel", "employeeId": "NIA003", "role": "resident", "balance": 72, "nest": "Kush-12"},
+        {"id": "u4", "name": "Sunita Devi", "employeeId": "NIA004", "role": "resident", "balance": 0, "nest": "Kush-12"},
     ]
 
-if 'products' not in st.session_state:
-    st.session_state.products = [
-        {"id": 5, "name": "Co-Living Housing", "category": "studio", "emoji": "🏠", "price": 3999, "period": "/mo"},
-        {"id": 6, "name": "Daily Meals Plan", "category": "studio", "emoji": "🍛", "price": 1499, "period": "/mo"},
-        {"id": 1, "name": "Job Matching Service", "category": "flow", "emoji": "💼", "price": 199, "period": "/mo"},
-        {"id": 10, "name": "Digital Literacy Course", "category": "tribe", "emoji": "📱", "price": 249, "period": ""},
-    ]
+if 'logs' not in st.session_state:
+    st.session_state.logs = []
 
-if 'transactions' not in st.session_state:
-    st.session_state.transactions = []
+# --- SIDEBAR & AUTH ---
+with st.sidebar:
+    st.markdown("# Nia Staff Portal")
+    st.markdown("---")
+    staff_id = st.text_input("Staff Employee ID", "EAE001")
+    if st.button("Logout"):
+        st.info("Log out of portal session?")
 
-if 'user' not in st.session_state:
-    st.session_state.user = None
+    st.markdown("---")
+    st.markdown("### Quick Shortcuts")
+    if st.button("🚀 View Frontend (Vercel)"):
+        st.markdown("[Open Resident App](https://nia-studio-app.vercel.app)") # Placeholder
 
-# --- AUTH LOGIC ---
-def login(emp_id, pin):
-    for u in st.session_state.users:
-        if u['employeeId'] == emp_id and u['pin'] == pin:
-            st.session_state.user = u
-            return True
-    return False
+# --- MAIN DASHBOARD ---
+st.title("Nest Management Ledger")
+st.write(f"Logged in: **Staff {staff_id}** | Nest: **Kush-12**")
 
-def logout():
-    st.session_state.user = None
-    st.rerun()
+tabs = st.tabs(["📝 Manual Ledger", "🏆 Leaderboard", "📊 Analytics", "⚙️ Resident Management"])
 
-# --- APP FLOW ---
-if st.session_state.user is None:
-    # --- LOGIN PAGE ---
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<div style='text-align: center; margin-top: 50px;'>", unsafe_allow_html=True)
-        st.markdown("<h1>Nia One</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #6e6e73;'>Sign in to your account</p>", unsafe_allow_html=True)
+with tabs[0]:
+    st.header("Daily Award/Deduct")
+    st.write("Phase 0 Digital Proxy for Manual Spreadsheets")
+    
+    col_r, col_l = st.columns([2, 1])
+    
+    with col_r:
+        search = st.text_input("Search Resident Name or ID", "")
         
-        emp_id = st.text_input("Employee ID", placeholder="e.g. NIA001")
-        pin = st.text_input("PIN", type="password", placeholder="4-digit PIN")
-        
-        if st.button("Sign In"):
-            if login(emp_id, pin):
-                st.rerun()
-            else:
-                st.error("Invalid Employee ID or PIN")
-        st.markdown("</div>", unsafe_allow_html=True)
+        for u in st.session_state.users:
+            if search.lower() in u['name'].lower() or search.lower() in u['employeeId'].lower():
+                with st.expander(f"👤 {u['name']} ({u['employeeId']}) — Current: {u['balance']} pts"):
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        action = st.selectbox("Action Code", [
+                            "NEST_MADE (+5)", 
+                            "CLEANUP (+3)", 
+                            "JAMBO_ATTENDANCE (+10)", 
+                            "NEST_NOT_MADE (-3)",
+                            "SPITTING (-10)",
+                            "SHOUTING (-15)"
+                        ], key=f"act_{u['id']}")
+                    with c2:
+                        note = st.text_input("Optional Note", key=f"note_{u['id']}")
+                    
+                    if st.button(f"Confirm {u['name']}", key=f"btn_{u['id']}"):
+                        points = int(action.split('(')[1].split(')')[0].replace('+', ''))
+                        u['balance'] += points
+                        st.session_state.logs.insert(0, {
+                            "time": datetime.now().strftime("%H:%M:%S"),
+                            "resident": u['name'],
+                            "action": action.split(' ')[0],
+                            "pts": points
+                        })
+                        st.success(f"Successfully logged {points} pts for {u['name']}")
+                        st.rerun()
 
-else:
-    user = st.session_state.user
-
-    # --- SIDEBAR NAV ---
-    with st.sidebar:
-        st.title("Nia Studio")
-        st.write(f"Logged in as: **{user['name']}**")
-        st.write(f"Role: `{user['role'].upper()}`")
-        
-        if user['role'] == 'resident':
-            page = st.radio("Navigation", ["Home & Store", "Leaderboard"])
+    with col_l:
+        st.subheader("Recent Activity")
+        if not st.session_state.logs:
+            st.info("No activities logged today yet.")
         else:
-            page = st.radio("Navigation", ["Manual Ledger", "Leaderboard"])
-            
-        if st.button("Sign Out"):
-            logout()
+            for log in st.session_state.logs[:10]:
+                st.markdown(f"**{log['time']}**: {log['resident']} received {log['pts']} pts for {log['action']}")
 
-    # --- PAGES ---
-    if page == "Home & Store":
-        # --- POINTS BANNER ---
-        st.markdown(f"""
-            <div class="points-banner">
-                <p style="text-transform: uppercase; font-size: 10px; font-weight: bold; margin-bottom: 5px; opacity: 0.8;">⚡ Your Points</p>
-                <h1 style="margin: 0;">{user['balance']} <span style="font-size: 14px; opacity: 0.7;">PTS</span></h1>
-                <p style="font-size: 12px; margin-top: 10px; opacity: 0.9;">You're 30 pts away from a free Umoja meal →</p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.title("The Nia Store.")
-        st.write("Everything you need to work, live, and thrive.")
-        
-        # --- FILTERS ---
-        cats = ["All", "Studio", "Flow", "Tribe"]
-        cols = st.columns(len(cats))
-        cat_filter = "All"
-        # In Streamlit, native buttons don't hold state easily without radio/select, 
-        # so we'll use a simple selectbox for robust filtering
-        cat_filter = st.selectbox("Category Filter", cats)
-        
-        search = st.text_input("Search services...", "")
-        
-        # --- PRODUCT GRID ---
-        filtered = st.session_state.products
-        if cat_filter != "All":
-            filtered = [p for p in filtered if p['category'].lower() == cat_filter.lower()]
-        if search:
-            filtered = [p for p in filtered if search.lower() in p['name'].lower()]
-            
-        cols = st.columns(3)
-        for i, p in enumerate(filtered):
-            with cols[i % 3]:
-                st.markdown(f"""
-                    <div class="card">
-                        <h1 style="font-size: 40px; margin: 0;">{p['emoji']}</h1>
-                        <p style="color: #0071e3; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-top: 10px;">{p['category']}</p>
-                        <h4 style="margin: 5px 0;">{p['name']}</h4>
-                        <p style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">₹{p['price']:,}{p['period']}</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                if st.button(f"Add to Bag", key=f"btn_{p['id']}"):
-                    st.success(f"Added {p['name']} to bag!")
+with tabs[1]:
+    st.header("Kush-12 Leaderboard")
+    df = pd.DataFrame(st.session_state.users)
+    df = df[df['role'] == 'resident'].sort_values(by='balance', ascending=False)
+    st.table(df[['name', 'employeeId', 'balance']])
 
-    elif page == "Leaderboard":
-        st.title("Kush-12 Points Leaderboard")
-        st.write("Top Contributors & Community Members")
-        
-        sorted_users = sorted([u for u in st.session_state.users if u['role'] == 'resident'], key=lambda x: x['balance'], reverse=True)
-        
-        for i, u in enumerate(sorted_users):
-            bgcolor = "#ffffff"
-            if i == 0: bgcolor = "#fffbeb"
-            elif i == 1: bgcolor = "#f8fafc"
-            
-            st.markdown(f"""
-                <div class="leaderboard-card" style="background-color: {bgcolor};">
-                    <div style="display: flex; align-items: center;">
-                        <div class="rank-badge" style="background-color: {'#fbbf24' if i==0 else '#94a3b8' if i==1 else '#e5e7eb'}; color: {'white' if i<2 else '#6b7280'};">
-                            {i+1}
-                        </div>
-                        <div>
-                            <p style="font-weight: bold; margin: 0; font-size: 18px;">{u['name']}</p>
-                            <p style="color: #6b7280; font-size: 12px; margin: 0;">{u['employeeId']}</p>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <p style="color: #0071e3; font-weight: 900; font-size: 24px; margin: 0;">{user['balance']} <span style="font-size: 12px; color: #6b7280;">PTS</span></p>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
+with tabs[2]:
+    st.header("Nest Performance Insights")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.metric("Total Residents", len([u for u in st.session_state.users if u['role'] == 'resident']))
+    with c2:
+        avg = sum(u['balance'] for u in st.session_state.users) / len(st.session_state.users)
+        st.metric("Avg Points/Res", f"{avg:.1f}")
+    with c3:
+        st.metric("Active Nests", "1")
+    
+    st.markdown("---")
+    st.bar_chart(df.set_index('name')['balance'])
 
-    elif page == "Manual Ledger":
-        st.title("Manual Ledger")
-        st.write("Phase 0 Pilot: Spreadsheets Digital Proxy")
-        
-        residents = [u for u in st.session_state.users if u['role'] == 'resident']
-        
-        for u in residents:
-            with st.expander(f"{u['name']} (NIA: {u['employeeId']}) - Current: {u['balance']} pts"):
-                act = st.selectbox("Action", ["Morning Check (+5)", "Common Cleanup (+3)", "Jambo Attendance (+10)", "Violation (-15)"], key=f"sel_{u['id']}")
-                if st.button("Log Action", key=f"log_{u['id']}"):
-                    points = 5 if "Check" in act else 3 if "Cleanup" in act else 10 if "Jambo" in act else -15
-                    u['balance'] += points
-                    st.success(f"Updated {u['name']}'s balance to {u['balance']} pts")
-                    st.rerun()
+with tabs[3]:
+    st.header("Onboarding / Offboarding")
+    with st.form("add_resident"):
+        st.write("Add New Resident to Kush-12")
+        new_name = st.text_input("Full Name")
+        new_id = st.text_input("Nia ID (e.g. NIA050)")
+        if st.form_submit_button("Onboard Resident"):
+            st.session_state.users.append({
+                "id": f"u{len(st.session_state.users)+1}",
+                "name": new_name,
+                "employeeId": new_id,
+                "role": "resident",
+                "balance": 0,
+                "nest": "Kush-12"
+            })
+            st.success(f"Added {new_name} to the Nest database!")
+            st.rerun()
 
-st.markdown("---")
-st.caption("© 2026 Nia One Ecosystem. Optimized for Streamlit Hosting.")
+st.divider()
+st.caption("Nia Backend Management Portal | v1.0.2")

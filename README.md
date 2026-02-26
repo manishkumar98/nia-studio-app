@@ -24,22 +24,23 @@ Nia Studio is a modern web application designed for blue-collar migrant workers 
 - Node.js (v18+)
 - npm or yarn
 
-### Installation (React/Vite)
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+### 🚀 Dual-Hosting Strategy
 
-### Hosting on Streamlit Cloud
-This project includes a Streamlit port (`app.py`) for quick cloud hosting.
-1. Connect this GitHub repo to [Streamlit Cloud](https://share.streamlit.io/).
-2. Set the main file path to `app.py`.
-3. Deploy!
+To balance premium UI for residents and rapid tool development for staff, this project is designed for two platforms:
+
+#### 1. Resident Frontend (Vercel)
+The high-fidelity React Single Page Application.
+- **URL**: [nia-studio-app.vercel.app](https://nia-studio-app.vercel.app)
+- **Tech**: React + Vite + Tailwind CSS
+- **Features**: Nia Store, Points Banner, Leaderboard.
+- **Deployment**: Automatic via GitHub push to `main`.
+
+#### 2. Staff Backend (Streamlit Cloud)
+The management ledger and internal staff tools.
+- **URL**: [nia-staff.streamlit.app](https://nia-staff.streamlit.app)
+- **Tech**: Python + Streamlit
+- **Features**: Manual Ledger, Daily Logging, Analytics, Resident Onboarding.
+- **Main file**: `app.py`
 
 ## 🏗️ Phased Roadmap
 
