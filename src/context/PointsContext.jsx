@@ -1,18 +1,45 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import { mockUsers } from '../data/mockUsers'
 
 const PointsContext = createContext()
 
 export function PointsProvider({ children }) {
-  const [userBalances, setUserBalances] = useState(
-    mockUsers.reduce((acc, user) => ({ ...acc, [user.id]: user.balance }), {})
+  // Persistence Helper
+  const getSaved = (key, fallback) => {
+    const saved = localStorage.getItem(key)
+    try {
+      return saved ? JSON.parse(saved) : fallback
+    } catch (e) {
+      return fallback
+    }
+  }
+
+  const [userBalances, setUserBalances] = useState(() =>
+    getSaved('nia_balances', mockUsers.reduce((acc, user) => ({ ...acc, [user.id]: user.balance }), {}))
   )
-  const [allTransactions, setAllTransactions] = useState([
-    { id: 1, userId: 'u1', date: '2026-02-20', description: 'Nest made before 7 AM', points: 5, type: 'credit' },
-    { id: 2, userId: 'u1', date: '2026-02-19', description: 'Common area cleanup', points: 3, type: 'credit' },
-  ])
+
+  const [allTransactions, setAllTransactions] = useState(() =>
+    getSaved('nia_transactions', [
+      { id: 1, userId: 'u1', date: '2026-02-20', description: 'Nest made before 7 AM', points: 5, type: 'credit' },
+      { id: 2, userId: 'u1', date: '2026-02-19', description: 'Common area cleanup', points: 3, type: 'credit' },
+    ])
+  )
+
+  const [vouchers, setVouchers] = useState(() => getSaved('nia_vouchers', []))
   const [cart, setCart] = useState([])
-  const [vouchers, setVouchers] = useState([])
+
+  // State Persistence Effects
+  useEffect(() => {
+    localStorage.setItem('nia_balances', JSON.stringify(userBalances))
+  }, [userBalances])
+
+  useEffect(() => {
+    localStorage.setItem('nia_transactions', JSON.stringify(allTransactions))
+  }, [allTransactions])
+
+  useEffect(() => {
+    localStorage.setItem('nia_vouchers', JSON.stringify(vouchers))
+  }, [vouchers])
 
   const addTransaction = (transaction) => {
     const newTransaction = {
@@ -65,7 +92,6 @@ export function PointsProvider({ children }) {
     setCart([])
   }
 
-  // Resident initiates the request
   const requestRedemption = (userId, reward) => {
     const balance = getBalance(userId)
     if (balance < reward.cost) {
@@ -88,7 +114,6 @@ export function PointsProvider({ children }) {
     return { success: true, voucher: newVoucher }
   }
 
-  // EAE scans and fulfills the request
   const fulfillRedemption = (code) => {
     const voucherIndex = vouchers.findIndex(v => v.code === code && v.status === 'PENDING')
 
@@ -103,7 +128,6 @@ export function PointsProvider({ children }) {
       return { success: false, message: 'Resident has insufficient points now' }
     }
 
-    // Deduct points NOW
     addTransaction({
       userId: voucher.userId,
       description: `Redeemed: ${voucher.name}`,
@@ -111,7 +135,6 @@ export function PointsProvider({ children }) {
       type: 'debit'
     })
 
-    // Update voucher status
     setVouchers(prev => prev.map(v =>
       v.code === code ? { ...v, status: 'FULFILLED', fulfilledDate: new Date().toISOString() } : v
     ))
