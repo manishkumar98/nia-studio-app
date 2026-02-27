@@ -3,13 +3,14 @@ import { useAuth } from '../context/AuthContext'
 import { usePoints } from '../context/PointsContext'
 
 export default function Me() {
-    const { currentUser } = useAuth()
+    const { currentUser, logout } = useAuth()
     const { getBalance, getTransactions, vouchers } = usePoints()
     const [selectedVoucher, setSelectedVoucher] = useState(null)
 
-    const balance = getBalance(currentUser.id)
-    const transactions = getTransactions(currentUser.id)
-    const myVouchers = vouchers.filter(v => v.userId === currentUser.id)
+    const userId = currentUser.uid || currentUser.id
+    const balance = getBalance(userId)
+    const transactions = getTransactions(userId)
+    const myVouchers = vouchers.filter(v => v.userId === userId)
 
     return (
         <div className="px-6 py-8 pb-32 max-w-4xl mx-auto">
@@ -68,8 +69,8 @@ export default function Me() {
                                     </div>
                                     <div className="text-right">
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${v.status === 'PENDING'
-                                                ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                                                : 'bg-green-50 text-green-600 border border-green-100'
+                                            ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                                            : 'bg-green-50 text-green-600 border border-green-100'
                                             }`}>
                                             {v.status}
                                         </span>
@@ -180,10 +181,16 @@ export default function Me() {
                 </div>
             )}
 
-            {/* App Support */}
-            <div className="mt-16 text-center">
+            {/* App Support & Actions */}
+            <div className="mt-16 flex flex-col items-center gap-6">
+                <button
+                    onClick={logout}
+                    className="w-full max-w-sm py-5 bg-red-50 text-red-600 rounded-[24px] font-black text-sm uppercase tracking-widest border border-red-100 active:scale-[0.98] transition-all"
+                >
+                    Sign Out
+                </button>
                 <button className="text-[11px] font-extrabold text-[#86868b] uppercase tracking-widest hover:text-[#0071e3] transition-colors">
-                    Support ID: {currentUser.id.substring(0, 8)} • NIA ONE SESSION
+                    Support ID: {(currentUser.id || currentUser.uid)?.substring(0, 8)} • NIA ONE SESSION
                 </button>
             </div>
         </div>

@@ -76,12 +76,9 @@ export default function Login() {
 
   const methods = portal === 'resident'
     ? [
-      { id: 'phone', label: 'Phone', disabled: false },
-      { id: 'google', label: 'Google', disabled: false },
       { id: 'legacy', label: 'PIN', disabled: false }
     ]
     : [
-      { id: 'google', label: 'Google', disabled: false },
       { id: 'legacy', label: 'EMP ID', disabled: false }
     ];
 
@@ -154,21 +151,23 @@ export default function Login() {
             </div>
 
             {/* Method Switcher */}
-            <div className="flex p-1.5 bg-gray-100/50 rounded-2xl w-full max-w-sm mx-auto">
-              {methods.map((m) => (
-                <button
-                  key={m.id}
-                  disabled={m.disabled}
-                  onClick={() => { setMethod(m.id); setError(''); setStep('input'); }}
-                  className={`flex-1 py-2.5 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${method === m.id
-                    ? (portal === 'staff' ? 'bg-[#1d1d1f] text-white shadow-lg' : 'bg-white text-blue-600 shadow-lg')
-                    : 'text-gray-300 hover:text-gray-500'
-                    }`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
+            {methods.length > 1 && (
+              <div className="flex p-1.5 bg-gray-100/50 rounded-2xl w-full max-w-sm mx-auto">
+                {methods.map((m) => (
+                  <button
+                    key={m.id}
+                    disabled={m.disabled}
+                    onClick={() => { setMethod(m.id); setError(''); setStep('input'); }}
+                    className={`flex-1 py-2.5 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${method === m.id
+                      ? (portal === 'staff' ? 'bg-[#1d1d1f] text-white shadow-lg' : 'bg-white text-blue-600 shadow-lg')
+                      : 'text-gray-300 hover:text-gray-500'
+                      }`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="space-y-6">
               {error && (
@@ -252,11 +251,6 @@ export default function Login() {
               )}
             </div>
 
-            <div className="pt-8 border-t border-gray-50">
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#86868b] leading-relaxed">
-                {portal === 'staff' ? 'Protected by Nia Enterprise Systems' : 'Secured by Nia Blockchain Cloud'}
-              </p>
-            </div>
           </div>
         </div>
       </main>

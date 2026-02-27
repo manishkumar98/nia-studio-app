@@ -47,8 +47,8 @@ export default function Header({ cartCount, onCartClick, userName, nestName, onS
                     </button>
 
                     {/* User Profile - Subtle */}
-                    <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-gray-200">
-                        <div className="text-right">
+                    <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
+                        <div className="hidden sm:block text-right">
                             <div className="text-[10px] font-bold text-[#1d1d1f]">{userName}</div>
                             <div className="text-[8px] text-[#86868b] font-medium uppercase tracking-tight">{nestName}</div>
                         </div>

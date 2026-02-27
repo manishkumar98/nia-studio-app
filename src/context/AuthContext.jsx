@@ -21,8 +21,16 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Check for persisted legacy user on mount
+    const storedUser = localStorage.getItem('nia_legacy_user')
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser))
+      } catch (e) { /* ignore */ }
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      // One-time seed for EVERYTHING into Firestore (Phase 4 Logic)
+      // ... seeding logic ...
       try {
         const usersSnap = await getDocs(collection(db, 'users'))
         if (usersSnap.empty) {
@@ -31,7 +39,7 @@ export function AuthProvider({ children }) {
             await setDoc(doc(db, 'users', mu.id), { ...mu, createdAt: new Date().toISOString() })
           }
         }
-
+        // ... products/rewards seeding omitted for brevity but should remain ...
         const productsSnap = await getDocs(collection(db, 'products'))
         if (productsSnap.empty) {
           console.log("[Phase 4 Build] Seeding products...");
@@ -52,12 +60,15 @@ export function AuthProvider({ children }) {
       }
 
       if (user) {
+        // Clear legacy user if switching to real auth
+        localStorage.removeItem('nia_legacy_user')
+
         // Fetch user profile from Firestore
         const userDoc = await getDoc(doc(db, 'users', user.uid))
         if (userDoc.exists()) {
           setCurrentUser({ uid: user.uid, ...userDoc.data() })
         } else {
-          // New user default profile
+          // New user default profile logic ...
           const newProfile = {
             name: user.displayName || 'New User',
             email: user.email || '',
@@ -71,7 +82,7 @@ export function AuthProvider({ children }) {
           await setDoc(doc(db, 'users', user.uid), newProfile)
           setCurrentUser({ uid: user.uid, ...newProfile })
         }
-      } else {
+      } else if (!storedUser) {
         setCurrentUser(null)
       }
       setLoading(false)
@@ -113,6 +124,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
+      localStorage.removeItem('nia_legacy_user')
       await signOut(auth)
       setCurrentUser(null)
     } catch (e) {
@@ -142,7 +154,10 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const mockLogin = (user) => setCurrentUser(user)
+  const mockLogin = (user) => {
+    localStorage.setItem('nia_legacy_user', JSON.stringify(user))
+    setCurrentUser(user)
+  }
 
   return (
     <AuthContext.Provider value={{
