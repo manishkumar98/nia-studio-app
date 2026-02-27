@@ -1,14 +1,13 @@
 import { usePoints } from '../context/PointsContext'
 
-export default function CartDrawer({ isOpen, onClose }) {
+export default function CartDrawer({ isOpen, onClose, onCheckout }) {
     const { cart, changeQty, removeFromCart, clearCart } = usePoints()
     const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
 
     if (!isOpen) return null
 
     const handleCheckout = () => {
-        alert(`Order placed successfully for ₹${total.toLocaleString('en-IN')}`)
-        clearCart()
+        onCheckout()
         onClose()
     }
 
@@ -39,7 +38,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                         cart.map((item) => (
                             <div key={item.id} className="flex gap-4 animate-fadeUp">
                                 <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl shrink-0 ${item.category === 'flow' ? 'bg-[#e3f0ff]' :
-                                        item.category === 'studio' ? 'bg-[#fff0e6]' : 'bg-[#e8e8ed]'
+                                    item.category === 'studio' ? 'bg-[#fff0e6]' : 'bg-[#e8e8ed]'
                                     }`}>
                                     {item.emoji}
                                 </div>

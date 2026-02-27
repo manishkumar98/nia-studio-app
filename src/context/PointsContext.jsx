@@ -30,21 +30,26 @@ export function PointsProvider({ children }) {
   const [userBalances, setUserBalances] = useState({})
   const [allTransactions, setAllTransactions] = useState([])
   const [vouchers, setVouchers] = useState([])
+  const [orders, setOrders] = useState([])
   const [cart, setCart] = useState([])
   const [loading, setLoading] = useState(true)
 
   // 1. Sync Balances from Firestore
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'balances'), (snapshot) => {
-      const balances = {}
-      snapshot.forEach(doc => {
-        balances[doc.id] = doc.data().points
-      })
-      // Merge with mock users if empty (initial seed)
-      if (Object.keys(balances).length === 0) {
-        const initial = mockUsers.reduce((acc, user) => ({ ...acc, [user.id]: user.balance }), {})
-        setUserBalances(initial)
+    const unsub = onSnapshot(collection(db, 'balances'), async (snapshot) => {
+      if (snapshot.empty) {
+        console.log("[Phase 4] Seeding initial balances to Firestore...");
+        for (const user of mockUsers) {
+          await setDoc(doc(db, 'balances', user.id), {
+            points: user.balance,
+            updatedAt: serverTimestamp()
+          });
+        }
       } else {
+        const balances = {}
+        snapshot.forEach(doc => {
+          balances[doc.id] = doc.data().points
+        })
         setUserBalances(balances)
       }
     })
@@ -67,6 +72,15 @@ export function PointsProvider({ children }) {
     const unsub = onSnapshot(collection(db, 'transactions'), (snapshot) => {
       const transList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       setAllTransactions(transList.sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds))
+    })
+    return unsub
+  }, [])
+
+  // 4. Sync Orders (COD Orders)
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'orders'), (snapshot) => {
+      const orderList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      setOrders(orderList.sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds))
     })
     return unsub
   }, [])
@@ -100,6 +114,22 @@ export function PointsProvider({ children }) {
       }
       return [...prev, { ...product, qty: 1 }]
     })
+  }
+
+  const changeQty = (productId, delta) => {
+    setCart(prev => {
+      return prev.map(item => {
+        if (item.id === productId) {
+          const newQty = Math.max(1, item.qty + delta)
+          return { ...item, qty: newQty }
+        }
+        return item
+      })
+    })
+  }
+
+  const removeFromCart = (productId) => {
+    setCart(prev => prev.filter(item => item.id !== productId))
   }
 
   const clearCart = () => setCart([])
@@ -183,6 +213,30 @@ export function PointsProvider({ children }) {
     return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() }
   }
 
+  const createOrder = async (userId, userName, cartItems, total) => {
+    const orderId = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase()
+    const newOrder = {
+      orderId,
+      userId,
+      userName,
+      items: cartItems,
+      total,
+      status: 'PENDING',
+      paymentMethod: 'COD',
+      createdAt: serverTimestamp(),
+      date: new Date().toISOString().split('T')[0]
+    }
+
+    try {
+      await addDoc(collection(db, 'orders'), newOrder)
+      clearCart()
+      return { success: true, orderId }
+    } catch (e) {
+      console.error("Order Creation Error:", e)
+      return { success: false, message: 'Failed to place order' }
+    }
+  }
+
   return (
     <PointsContext.Provider value={{
       userBalances,
@@ -192,11 +246,15 @@ export function PointsProvider({ children }) {
       addTransaction,
       cart,
       addToCart,
+      changeQty,
+      removeFromCart,
       clearCart,
       vouchers,
+      orders,
       requestRedemption,
       fulfillRedemption,
       getVoucherRecord,
+      createOrder,
       loading
     }}>
       {children}

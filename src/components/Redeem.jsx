@@ -1,25 +1,53 @@
-import { useState } from 'react'
-import { rewards } from '../data/rewards'
+import { useState, useEffect } from 'react'
+import { db } from '../firebase'
+import { collection, getDocs } from 'firebase/firestore'
 import { usePoints } from '../context/PointsContext'
 import { useAuth } from '../context/AuthContext'
 
 export default function Redeem() {
     const { currentUser } = useAuth()
     const { getBalance, requestRedemption } = usePoints()
+    const [rewards, setRewards] = useState([])
+    const [loading, setLoading] = useState(true)
     const [successVoucher, setSuccessVoucher] = useState(null)
     const [error, setError] = useState('')
 
-    const balance = getBalance(currentUser.id)
+    const userId = currentUser?.uid || currentUser?.id
+    const balance = getBalance(userId)
+
+    useEffect(() => {
+        const fetchRewards = async () => {
+            try {
+                const snap = await getDocs(collection(db, 'rewards'))
+                const data = snap.docs.map(doc => doc.data())
+                setRewards(data.sort((a, b) => a.id - b.id))
+            } catch (e) {
+                console.error("Redeem Fetch Error:", e)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchRewards()
+    }, [])
 
     const handleRedeem = async (reward) => {
         setError('')
-        const result = await requestRedemption(currentUser.id, reward)
+        const result = await requestRedemption(userId, reward)
         if (result.success) {
             setSuccessVoucher(result.voucher)
             window.scrollTo(0, 0)
         } else {
             setError(result.message)
         }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+                <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+                <p className="text-sm font-bold text-[#86868b] uppercase tracking-widest">Hydrating rewards...</p>
+            </div>
+        )
     }
 
     if (successVoucher) {

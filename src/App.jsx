@@ -12,12 +12,17 @@ import Earn from './components/Earn'
 import Redeem from './components/Redeem'
 import Me from './components/Me'
 import Scanner from './components/Scanner'
+import Header from './components/Header'
+import Footer from './components/Footer'
+import Checkout from './components/Checkout'
+import OrderTerminal from './components/OrderTerminal'
 
 export default function App() {
   const { currentUser, logout, loading } = useAuth()
   const { cart } = usePoints()
   const [activeTab, setActiveTab] = useState('store')
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isCheckout, setIsCheckout] = useState(false)
   const [staffView, setStaffView] = useState('scanner')
 
   if (loading) {
@@ -76,6 +81,12 @@ export default function App() {
               📷 QR Scanner
             </button>
             <button
+              onClick={() => setStaffView('orders')}
+              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${staffView === 'orders' ? 'bg-[#0071e3] text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+            >
+              🛍️ Orders
+            </button>
+            <button
               onClick={() => setStaffView('ledger')}
               className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${staffView === 'ledger' ? 'bg-[#0071e3] text-white shadow-lg shadow-blue-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
             >
@@ -92,6 +103,7 @@ export default function App() {
 
         <main className="max-w-7xl mx-auto p-4 md:p-8">
           {staffView === 'scanner' && <Scanner />}
+          {staffView === 'orders' && <OrderTerminal />}
           {staffView === 'ledger' && <ManualLedger />}
           {staffView === 'leaderboard' && <Leaderboard />}
         </main>
@@ -100,47 +112,28 @@ export default function App() {
   }
 
   // --- 2. RESIDENT VIEW (Nia Store & Points experience) ---
-  return (
-    <div className="min-h-screen bg-[#f5f5f7] pb-24">
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 h-16">
-        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <div className="w-10 h-10 bg-[#0071e3] rounded-xl flex items-center justify-center text-white">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-4.305-6.218A7 7 0 1118.354 12.571m1.391 8.357c-1.744-2.772-2.753-6.054-2.753-9.571m-2.753-7.429L12 9" /></svg>
-            </div>
-            <span className="text-xl font-black tracking-tight text-[#1d1d1f] ml-2 font-display">Nia One</span>
-          </div>
+  if (!isStaff && isCheckout) {
+    return (
+      <div className="min-h-screen bg-[#f5f5f7]">
+        <Checkout onBack={() => setIsCheckout(false)} />
+      </div>
+    )
+  }
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-[#6e6e73] hover:text-[#1d1d1f] transition-all"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 11-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-              {cartCount > 0 && (
-                <span className="absolute top-1 right-1 bg-[#0071e3] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-bounce">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-            <div className="hidden md:block text-right">
-              <div className="text-sm font-bold text-[#1d1d1f]">{currentUser.name}</div>
-              <div className="text-[10px] text-[#86868b] uppercase font-bold tracking-widest">{currentUser.nestName}</div>
-            </div>
-            <button
-              onClick={() => { console.log("Sign Out Clicked"); logout(); }}
-              className="p-2 text-gray-400 hover:text-[#0071e3] transition-colors font-bold text-[10px] uppercase tracking-[0.2em]"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </nav>
+  return (
+    <div className="min-h-screen bg-white pb-32">
+      <Header
+        cartCount={cartCount}
+        onCartClick={() => setIsCartOpen(true)}
+        userName={currentUser.name}
+        nestName={currentUser.nestName}
+        onSignOut={() => { console.log("Sign Out Clicked"); logout(); }}
+        balance={usePoints().getBalance(userId)}
+      />
 
       <main className="max-w-7xl mx-auto">
         {activeTab === 'store' && (
           <div className="animate-fadeUp">
-            <PointsBanner userId={userId} />
             <Store />
           </div>
         )}
@@ -154,8 +147,13 @@ export default function App() {
         {activeTab === 'me' && <Me />}
       </main>
 
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onCheckout={() => setIsCheckout(true)}
+      />
+      {activeTab === 'store' && <Footer />}
+      <BottomNav activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setIsCheckout(false); }} />
     </div>
   )
 }

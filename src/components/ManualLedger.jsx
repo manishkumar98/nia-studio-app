@@ -66,7 +66,7 @@ export default function ManualLedger() {
                 <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                     <div>
                         <h1 className="text-3xl font-black text-[#1d1d1f] tracking-tight">Manual Ledger</h1>
-                        <p className="text-sm font-bold text-[#6e6e73] uppercase tracking-widest opacity-60">Phase 0 Pilot • Spreadsheet Proxy</p>
+                        <p className="text-sm font-bold text-[#6e6e73] uppercase tracking-widest opacity-60">Phase 4 • Live Cloud Database</p>
                     </div>
 
                     {/* Compact Search Bar */}

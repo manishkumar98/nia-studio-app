@@ -1,5 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { auth, googleProvider, db } from '../firebase'
+import { mockUsers } from '../data/mockUsers'
+import { products } from '../data/products'
+import { rewards } from '../data/rewards'
 import {
   onAuthStateChanged,
   signInWithPopup,
@@ -9,7 +12,7 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber
 } from 'firebase/auth'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore'
 
 const AuthContext = createContext()
 
@@ -19,17 +22,46 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // One-time seed for EVERYTHING into Firestore (Phase 4 Logic)
+      try {
+        const usersSnap = await getDocs(collection(db, 'users'))
+        if (usersSnap.empty) {
+          console.log("[Phase 4 Build] Seeding users...");
+          for (const mu of mockUsers) {
+            await setDoc(doc(db, 'users', mu.id), { ...mu, createdAt: new Date().toISOString() })
+          }
+        }
+
+        const productsSnap = await getDocs(collection(db, 'products'))
+        if (productsSnap.empty) {
+          console.log("[Phase 4 Build] Seeding products...");
+          for (const p of products) {
+            await setDoc(doc(db, 'products', p.id.toString()), p)
+          }
+        }
+
+        const rewardsSnap = await getDocs(collection(db, 'rewards'))
+        if (rewardsSnap.empty) {
+          console.log("[Phase 4 Build] Seeding rewards...");
+          for (const r of rewards) {
+            await setDoc(doc(db, 'rewards', r.id.toString()), r)
+          }
+        }
+      } catch (e) {
+        console.error("Seeding Error:", e)
+      }
+
       if (user) {
         // Fetch user profile from Firestore
         const userDoc = await getDoc(doc(db, 'users', user.uid))
         if (userDoc.exists()) {
           setCurrentUser({ uid: user.uid, ...userDoc.data() })
         } else {
-          // New user default profile (if not created via social login flow)
+          // New user default profile
           const newProfile = {
             name: user.displayName || 'New User',
             email: user.email || '',
-            role: 'resident', // Default role for safety
+            role: 'resident',
             nestId: 'n1',
             nestName: 'Kush-12',
             balance: 100,
@@ -51,7 +83,7 @@ export function AuthProvider({ children }) {
     const newProfile = {
       name: user.displayName || 'New User',
       email: user.email || '',
-      role: role, // 'resident' or 'eae'
+      role: role,
       nestId: 'n1',
       nestName: 'Kush-12',
       balance: role === 'resident' ? 100 : 0,
@@ -82,7 +114,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await signOut(auth)
-      setCurrentUser(null) // Manual clear for mock users
+      setCurrentUser(null)
     } catch (e) {
       console.error("Logout Error:", e)
       setCurrentUser(null)
@@ -110,7 +142,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Legacy support
   const mockLogin = (user) => setCurrentUser(user)
 
   return (

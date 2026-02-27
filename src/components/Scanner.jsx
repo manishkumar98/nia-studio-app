@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { usePoints } from '../context/PointsContext'
 import { useAuth } from '../context/AuthContext'
-import { mockUsers } from '../data/mockUsers'
+import { db } from '../firebase'
+import { getDoc, doc } from 'firebase/firestore'
 
 export default function Scanner() {
     const { fulfillRedemption, getBalance, vouchers, getVoucherRecord } = usePoints()
@@ -37,15 +38,16 @@ export default function Scanner() {
                 return
             }
 
-            // Get resident details
-            const resident = mockUsers.find(u => u.id === voucher.userId)
+            // Get resident details from Firestore
+            const residentDoc = await getDoc(doc(db, 'users', voucher.userId))
+            const residentData = residentDoc.exists() ? residentDoc.data() : null
             const balance = getBalance(voucher.userId)
 
             setScannedVoucher({
                 ...voucher,
-                residentName: resident ? resident.name : 'Unknown Resident',
+                residentName: residentData ? residentData.name : 'Unknown Resident',
                 currentBalance: balance,
-                residentNest: resident ? resident.nestName : 'N/A'
+                residentNest: residentData ? residentData.nestName : 'N/A'
             })
             setIsScanning(false)
         } catch (err) {
